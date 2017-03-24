@@ -184,10 +184,10 @@ void LightControl() {
     PWMChange(0, 1023);
   } else if (lightState == OFF){
     PWMChange(0, 0);
-  } else if (lightState == AUTO && motionDetect == true && luxString.toInt() < atoi(JConf.lighton_lux)){
+  } else if (lightState == AUTO && luxString.toInt() < atoi(JConf.lighton_lux)){
     PWMChange(0, 1023);
     lightOffTimer = millis();
-  } else if (lightState == AUTO && motionDetect == false && fading[0].cycleEnd != 0){
+  } else if (lightState == AUTO && fading[0].cycleEnd != 0){
     if (millis() - lightOffTimer >= atoi(JConf.lightoff_delay) * 60UL * 1000UL){
       PWMChange(0, 0);
     }

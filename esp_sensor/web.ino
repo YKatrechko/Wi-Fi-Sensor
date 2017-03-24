@@ -44,10 +44,12 @@ const char HTTP_HEAD[] PROGMEM =
     "<title id='header'>{module_id}</title>"
     "<meta charset='utf-8'>"
     "<meta name='viewport' content='width=device-width, initial-scale=1'>"
-    "<link rel='shortcut icon' href='favicon.ico'>"
+    "<link rel='shortcut icon' href='/favicon.ico'>"
     "<link rel='stylesheet' href='/bootstrap.min.css'>"
+    "<link rel='stylesheet' href='/jquery.timepicker.css'>"
     "<script src='/jquery.min.js'></script>"
     "<script src='/bootstrap.min.js'></script>"
+    "<script src='/jquery.timepicker.min.js'></script>"
   "</head>";
 
 const char HTTP_BODY[] PROGMEM =
@@ -120,6 +122,21 @@ const char HTTP_FORM_INPUT_TXT_UNIT[] PROGMEM =
         "<input type='text'  id='{id}' name='{id}' length=32 placeholder='{value}' value='{value}' class='form-control'>"
         "<span class='input-group-addon'>{unit}</span>"
     "</div>"
+"</div>";
+
+const char HTTP_FORM_INPUT_TXT_TIME[] PROGMEM =
+"<div class='form-group'>"
+    "<div class='input-group'>"
+        "<span class='input-group-addon'>{name}</span>"
+        "<input type='text' id='{id}' name='{id}' length=32 placeholder='{value}' value='{value}' class='form-control'>"
+        "<span id='{icon}' class='input-group-addon'><span class='glyphicon glyphicon-time'></span></span>"
+    "</div>"
+    "<script>"
+        "$(function() {"
+            "$('#{id}').timepicker({ 'scrollDefault': 'now', 'timeFormat': 'H:i', 'step': 10, 'forceRoundTime': true, 'show2400': true });"
+            "$('#{icon}').on('click', function(){$('#{id}').timepicker('show');});"
+        "});"
+    "</script>"
 "</div>";
 
 const char HTTP_FORM_INPUT_PWD[] PROGMEM =
@@ -702,17 +719,23 @@ void handleFileList() {
 String httpHead() {
   String head = FPSTR(HTTP_HEAD);
   String bootstrapCss = "/bootstrap.min.css";
+  String timepickerCss = "/jquery.timepicker.css";
   String bootstrapJs = "/bootstrap.min.js";
   String jqueryJs = "/jquery.min.js";
+  String timepickerJs = "/jquery.timepicker.min.js";
 
   String bootstrapCssInet = "http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css";
+  String timepickerCssInet = "http://jonthornton.github.io/jquery-timepicker/jquery.timepicker.css";
   String bootstrapJsInet = "http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js";
   String jqueryJsInet = "https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js";
+  String timepickerJsInet = "http://jonthornton.github.io/jquery-timepicker/jquery.timepicker.min.js";
 
   if ( !SPIFFS.exists(bootstrapCss + ".gz") ) {
     head.replace(bootstrapCss, bootstrapCssInet);
+    head.replace(timepickerCss, timepickerCssInet);
     head.replace(bootstrapJs, bootstrapJsInet);
     head.replace(jqueryJs, jqueryJsInet);
+    head.replace(timepickerJs, timepickerJsInet);
   }
   head.replace("{module_id}", String(JConf.module_id));
   return head;
@@ -1356,20 +1379,31 @@ void handleEspConfig()
   String form = FPSTR(HTTP_FORM_START);
   form += String(F("<input id='w' name='w' value='5' hidden>"));
   form += String(F("<h4>Light 1</h4>"));
-
-
+  
   form += FPSTR(HTTP_FORM_INPUT_TXT);
   form.replace("{id}", "light_pin");
   form.replace("{name}", "Pin");
   form.replace("{value}", String(JConf.light_pin));
 
-  form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
-  form.replace("{id}", "lightoff_delay");
-  form.replace("{name}", "Off Delay");
+  form += FPSTR(HTTP_FORM_INPUT_TXT_TIME);
+  form.replace("{id}", "light_start");
+  form.replace("{name}", "Start Time");
   form.replace("{value}", String(JConf.lightoff_delay));
-  form.replace("{unit}", "min");
+  form.replace("{icon}", "light_start_icon");
+
+  form += FPSTR(HTTP_FORM_INPUT_TXT_TIME);
+  form.replace("{id}", "light_stop");
+  form.replace("{name}", "Stop Time");
+  form.replace("{value}", String(JConf.lightoff_delay));
+  form.replace("{icon}", "light_stop_icon");
 
   if (atoi(JConf.bh1750_enable) == 1){
+    form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
+    form.replace("{id}", "lightoff_delay");
+    form.replace("{name}", "Off Delay");
+    form.replace("{value}", String(JConf.lightoff_delay));
+    form.replace("{unit}", "min");
+    
     form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
     form.replace("{id}", "lighton_lux");
     form.replace("{name}", "On Lux");
