@@ -15,8 +15,8 @@ JsonConf JConf;
 #define DS18X20_ON
 
 #ifdef DS18X20_ON
-  #define DS18X20_PIN 14
-  #define MAX_DS_SENSORS 2
+#define DS18X20_PIN 14
+#define MAX_DS_SENSORS 2
 #endif //DS18X20_ON
 //------------------------------------------------------------------------------
 
@@ -37,10 +37,10 @@ JsonConf JConf;
 #define NTP_ON
 
 #ifdef NTP_ON
-  #define NTP_ERROR_TIME 30000 // Если за это время не смогли обновить время, засыпаем
-  #define NTP_TIME_SLEEP 600000 // Время сна
-  int ntpTimer = 0;
-  unsigned long ntpLastUpdateTime = 0;
+#define NTP_ERROR_TIME 30000 // Если за это время не смогли обновить время, засыпаем
+#define NTP_TIME_SLEEP 600000 // Время сна
+int ntpTimer = 0;
+unsigned long ntpLastUpdateTime = 0;
 #endif //NTP_ON
 //------------------------------------------------------------------------------
 
@@ -48,11 +48,11 @@ JsonConf JConf;
 //#define ENCODER_ON                              // Включить поддержку энкодера
 
 #ifdef ENCODER_ON
-  uint8_t encoderDirection = 0;                 // Направление поворота энкодера
-  bool encoderFlagA = false;
-  bool encoderFlagB = false;
-  int encoderResetTimer = 0;
-  int encoderResetInterval = 2000;                     // Интервал сброса флагов
+uint8_t encoderDirection = 0;                 // Направление поворота энкодера
+bool encoderFlagA = false;
+bool encoderFlagB = false;
+int encoderResetTimer = 0;
+int encoderResetInterval = 2000;                     // Интервал сброса флагов
 #endif //ENCODER_ON
 //------------------------------------------------------------------------------
 
@@ -109,12 +109,12 @@ Adafruit_MQTT_Publish pubTopicHumidity = Adafruit_MQTT_Publish(&mqtt, JConf.publ
 Adafruit_MQTT_Publish pubTopicPressure = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
 
 #ifdef PZEM_ON
-  Adafruit_MQTT_Publish pubTopicPzemVoltage = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
-  Adafruit_MQTT_Publish pubTopicPzemCurrent = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
-  Adafruit_MQTT_Publish pubTopicPzemPower = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
-  Adafruit_MQTT_Publish pubTopicPzemEnergy = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
+Adafruit_MQTT_Publish pubTopicPzemVoltage = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
+Adafruit_MQTT_Publish pubTopicPzemCurrent = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
+Adafruit_MQTT_Publish pubTopicPzemPower = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
+Adafruit_MQTT_Publish pubTopicPzemEnergy = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
 
-  Adafruit_MQTT_Subscribe subTopicPzemReset = Adafruit_MQTT_Subscribe(&mqtt, JConf.command_pub_topic);
+Adafruit_MQTT_Subscribe subTopicPzemReset = Adafruit_MQTT_Subscribe(&mqtt, JConf.command_pub_topic);
 #endif //PZEM_ON
 
 Adafruit_MQTT_Publish pubTopicMhz19ppm = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
@@ -133,22 +133,22 @@ Adafruit_MQTT_Subscribe subTopicUptime = Adafruit_MQTT_Subscribe(&mqtt, JConf.co
 
 
 #ifdef DS18X20_ON
-  struct DS1820_T {
-    uint8_t type;
-    //float data;
-    String dsTemp = "none";
-    String addressString = "none";
-    byte address[8];
-    Adafruit_MQTT_Publish pubTopic = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
-    char ds_buff[MQTTSZ];
-  } dsSensor;
+struct DS1820_T {
+  uint8_t type;
+  //float data;
+  String dsTemp = "none";
+  String addressString = "none";
+  byte address[8];
+  Adafruit_MQTT_Publish pubTopic = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
+  char ds_buff[MQTTSZ];
+} dsSensor;
 
-  DS1820_T dsData[MAX_DS_SENSORS];
-  uint8_t findDsSensors = 0;
-  uint8_t currentDsSensor = 0;
-  bool searchDsSensorDone = false;
-  bool flag_ds_sensor_read_delay = false;
-  enum DS_SENSOR_ENUM {DS18S20, DS18B20, DS1822, UNKNOWN};
+DS1820_T dsData[MAX_DS_SENSORS];
+uint8_t findDsSensors = 0;
+uint8_t currentDsSensor = 0;
+bool searchDsSensorDone = false;
+bool flag_ds_sensor_read_delay = false;
+enum DS_SENSOR_ENUM {DS18S20, DS18B20, DS1822, UNKNOWN};
 #endif //DS18X20_ON
 
 
@@ -195,12 +195,12 @@ String pzemPowerString =   "none";
 String pzemEnergyString =  "none";
 String mhz19PpmString =    "none";
 
-long Day=0;
-int Hour =0;
-int Minute=0;
-int Second=0;
-int HighMillis=0;
-int Rollover=0;
+long Day = 0;
+int Hour = 0;
+int Minute = 0;
+int Second = 0;
+int HighMillis = 0;
+int Rollover = 0;
 
 int wifiReconnectTimer = 0;
 int rebootTimer = 0;
@@ -226,10 +226,10 @@ char temperature_buff[MQTTSZ];
 char humidity_buff[MQTTSZ];
 char pressure_buff[MQTTSZ];
 #ifdef PZEM_ON
-  char pzemVoltage_buff[MQTTSZ];
-  char pzemCurrent_buff[MQTTSZ];
-  char pzemPower_buff[MQTTSZ];
-  char pzemEnergy_buff[MQTTSZ];
+char pzemVoltage_buff[MQTTSZ];
+char pzemCurrent_buff[MQTTSZ];
+char pzemPower_buff[MQTTSZ];
+char pzemEnergy_buff[MQTTSZ];
 #endif //PZEM_ON
 char mhz19ppm_buff[MQTTSZ];
 char freeMemory_buff[MQTTSZ];
@@ -244,9 +244,18 @@ char lightType_buff_sub[MQTTSZ];
 char lightType2_buff_sub[MQTTSZ];
 char uptime_buff_sub[MQTTSZ];
 #ifdef PZEM_ON
-  char pzemReset_buff_sub[MQTTSZ];
+char pzemReset_buff_sub[MQTTSZ];
 #endif //PZEM_ON
 
+struct WORKTIME_T
+{
+  unsigned int state;
+  unsigned int start_midn_minutes;
+  unsigned int stop_midn_minutes;
+} worktime[2] = {
+  {1, 0, 1440},
+  {1, 0, 1440}
+};
 
 const char *AP = "AP";
 const char *STA = "STA";

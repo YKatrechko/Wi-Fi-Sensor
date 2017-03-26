@@ -88,7 +88,11 @@ class JsonConf
     char pzem_enable                  [2]  = "0"                  ;
     char mhz19_enable                 [2]  = "0"                  ;
     char ds18x20_enable               [2]  = "0"                  ;
-
+    
+    char light_start_time             [6]  = "00:00"              ;
+    char light_stop_time              [6]  = "24:00"              ;
+    char light2_start_time            [6]  = "00:00"              ;
+    char light2_stop_time             [6]  = "24:00"              ;
 
   private:
 };

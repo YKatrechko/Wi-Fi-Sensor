@@ -133,7 +133,7 @@ const char HTTP_FORM_INPUT_TXT_TIME[] PROGMEM =
   "</div>"
   "<script>"
   "$(function() {"
-  "$('#{id}').timepicker({ 'scrollDefault': 'now', 'timeFormat': 'H:i', 'step': 10, 'forceRoundTime': true, 'show2400': true });"
+  "$('#{id}').timepicker({ 'scrollDefault': 'now', 'timeFormat': 'H:i', 'step': 30, 'forceRoundTime': true, 'show2400': true });"
   "$('#{icon}').on('click', function(){$('#{id}').timepicker('show');});"
   "});"
   "</script>"

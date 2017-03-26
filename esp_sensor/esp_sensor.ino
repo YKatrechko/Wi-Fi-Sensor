@@ -17,59 +17,59 @@ extern "C" {
 SimpleTimer timer;
 
 #if defined(NTP_ON)
-  #include "NTPClient.h"
-  WiFiUDP ntpUDP;
-  NTPClient timeClient(ntpUDP);
+#include "NTPClient.h"
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP);
 #endif
 
 #if defined(UART_ON)
-  #include "MY_ESP_UART.h"
-  Espuart Uart;
+#include "MY_ESP_UART.h"
+Espuart Uart;
 #endif
 
 #if defined(DHT_ON)
-  #include <DHT.h>
-  // Uncomment the type of sensor in use:
-  //#define DHTTYPE           DHT11     // DHT 11
-  #define DHTTYPE           DHT22     // DHT 22 (AM2302)
-  //#define DHTTYPE           DHT21     // DHT 21 (AM2301)
-  DHT dht(atoi(JConf.dht_pin), DHTTYPE);
+#include <DHT.h>
+// Uncomment the type of sensor in use:
+//#define DHTTYPE           DHT11     // DHT 11
+#define DHTTYPE           DHT22     // DHT 22 (AM2302)
+//#define DHTTYPE           DHT21     // DHT 21 (AM2301)
+DHT dht(atoi(JConf.dht_pin), DHTTYPE);
 #endif
 
 #if defined(DS18X20_ON)
-  #include "OneWire.h"
-  OneWire ds(DS18X20_PIN);
+#include "OneWire.h"
+OneWire ds(DS18X20_PIN);
 #endif
 
 #if defined(BH1750_ON)
-  #include "BH1750.h"
-  BH1750 lightSensor;
+#include "BH1750.h"
+BH1750 lightSensor;
 #endif
 
 #if defined(BME280_ON)
-  #include "SparkFunBME280.h"
-  BME280 bmeSensor;
+#include "SparkFunBME280.h"
+BME280 bmeSensor;
 #endif
 
 #if defined(SHT21_ON)
-  #include "HTU21D.h"
-  HTU21D myHTU21D;
+#include "HTU21D.h"
+HTU21D myHTU21D;
 #endif
 
 #if defined(LCD_ON)
-  #include <LiquidCrystal_I2C.h>
-  LiquidCrystal_I2C lcd(0x27,16,2);  // Устанавливаем дисплей
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27, 16, 2); // Устанавливаем дисплей
 #endif
 
 #if defined(PZEM_ON)
-  #include "PZEM004T.h"
-  PZEM004T pzem(&Serial);
-  IPAddress ip_pzem(192,168,1,1);
-  float coil_ratio = 1.84; // Если используем разные катушки, подбираем коэффициент
-  enum PZEM_ENUM {PZEM_VOLTAGE, PZEM_CURRENT, PZEM_POWER, PZEM_ENERGY};
-  PZEM_ENUM pzem_current_read = PZEM_VOLTAGE;
-  enum PZEM_RESET_ENUM {PZEM_STAGE1, PZEM_STAGE2, PZEM_STAGE3, PZEM_STAGE4};
-  PZEM_RESET_ENUM pzem_reset_stage = PZEM_STAGE1;
+#include "PZEM004T.h"
+PZEM004T pzem(&Serial);
+IPAddress ip_pzem(192, 168, 1, 1);
+float coil_ratio = 1.84; // Если используем разные катушки, подбираем коэффициент
+enum PZEM_ENUM {PZEM_VOLTAGE, PZEM_CURRENT, PZEM_POWER, PZEM_ENERGY};
+PZEM_ENUM pzem_current_read = PZEM_VOLTAGE;
+enum PZEM_RESET_ENUM {PZEM_STAGE1, PZEM_STAGE2, PZEM_STAGE3, PZEM_STAGE4};
+PZEM_RESET_ENUM pzem_reset_stage = PZEM_STAGE1;
 #endif
 
 WiFiUDP portUDP;            // UDP Syslog
@@ -88,19 +88,20 @@ struct FADING_T
   int cycleEnd;
   unsigned long timerFade;
   unsigned int delayFade;
-}fading[2] = {
-   {atoi(JConf.light_pin),0,0,0,20},
-   {atoi(JConf.light2_pin),0,0,0,20}
+} fading[2] = {
+  {atoi(JConf.light_pin), 0, 0, 0, 30},
+  {atoi(JConf.light2_pin), 0, 0, 0, 30}
 };
 
+extern WORKTIME_T worktime[2];
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
-static char* floatToChar(float charester)
-{
- dtostrf(charester, 1, 0, value_buff);
- return value_buff;
-}
+  static char* floatToChar(float charester)
+  {
+  dtostrf(charester, 1, 0, value_buff);
+  return value_buff;
+  }
 */
 
 bool MqttConnect();
@@ -130,7 +131,7 @@ void encoderReset() {
   addLog_P(LOG_LEVEL_DEBUG, "encoderReset()");
 }
 
-void encoderAction(bool reverse=false) {
+void encoderAction(bool reverse = false) {
   if (reverse == true) {
     addLog_P(LOG_LEVEL_ERROR, "Encoder <= Reverse direction");
   } else {
@@ -168,7 +169,20 @@ void encoderReadPinB() {
 }
 #endif //ENCODER_ON
 
-
+//  String hoursStr = hours < 10 ? "0" + String(hours) : String(hours);
+//  String minuteStr = minutes < 10 ? "0" + String(minutes) : String(minutes);
+bool validate_worktime(WORKTIME_T wtime) {
+#ifdef NTP_ON
+  if (atoi(JConf.ntp_enable) == 1 && timeClient.update()) {
+    unsigned long rawTime = timeClient.getEpochTime();
+    unsigned int midnight_minutes = (rawTime % 86400L) / 60;
+    if ((wtime.start_midn_minutes < wtime.stop_midn_minutes && midnight_minutes < wtime.start_midn_minutes) // A interv 2
+        || (wtime.start_midn_minutes > wtime.stop_midn_minutes && midnight_minutes > wtime.start_midn_minutes && midnight_minutes < wtime.stop_midn_minutes))   // B interv 1 3
+      return false;
+    }
+#endif
+  return true;
+}
 
 void LightControl() {
 
@@ -180,28 +194,28 @@ void LightControl() {
   String ON = "ON";
   String OFF = "OFF";
 
-  if (lightState == ON){
+  if (lightState == ON) {
     PWMChange(0, 1023);
-  } else if (lightState == OFF){
+  } else if (lightState == OFF) {
     PWMChange(0, 0);
-  } else if (lightState == AUTO && luxString.toInt() < atoi(JConf.lighton_lux)){
+  } else if (lightState == AUTO && luxString.toInt() < atoi(JConf.lighton_lux)) {
     PWMChange(0, 1023);
     lightOffTimer = millis();
-  } else if (lightState == AUTO && fading[0].cycleEnd != 0){
-    if (millis() - lightOffTimer >= atoi(JConf.lightoff_delay) * 60UL * 1000UL){
+  } else if (lightState == AUTO && fading[0].cycleEnd != 0) {
+    if (millis() - lightOffTimer >= atoi(JConf.lightoff_delay) * 60UL * 1000UL) {
       PWMChange(0, 0);
     }
   }
 
-  if (lightState2 == ON){
+  if (lightState2 == ON) {
     PWMChange(1, 1023);
-  } else if (lightState2 == OFF){
+  } else if (lightState2 == OFF) {
     PWMChange(1, 0);
-  } else if (lightState2 == AUTO && motionDetect == true && luxString.toInt() < atoi(JConf.light2on_lux)){
+  } else if (lightState2 == AUTO && motionDetect == true && luxString.toInt() < atoi(JConf.light2on_lux)) {
     PWMChange(1, 1023);
     lightOffTimer2 = millis();
-  } else if (lightState2 == AUTO && motionDetect == false && fading[1].cycleEnd != 0){
-    if (millis() - lightOffTimer2 >= atoi(JConf.light2off_delay) * 60UL * 1000UL){
+  } else if (lightState2 == AUTO && motionDetect == false && fading[1].cycleEnd != 0) {
+    if (millis() - lightOffTimer2 >= atoi(JConf.light2off_delay) * 60UL * 1000UL) {
       PWMChange(1, 0);
     }
   }
@@ -244,7 +258,7 @@ void GetBmeSensorData()
   snprintf_P(log, sizeof(log), PSTR("GetBmeSensorData: Temperature: %s C"), temperatureString.c_str());
   addLog(LOG_LEVEL_INFO, log);
 
-  pressureString = String(bmeSensor.readFloatPressure()/133.3F);
+  pressureString = String(bmeSensor.readFloatPressure() / 133.3F);
   snprintf_P(log, sizeof(log), PSTR("GetBmeSensorData: Pressure: %s"), pressureString.c_str());
   addLog(LOG_LEVEL_INFO, log);
 
@@ -261,7 +275,7 @@ void GetBmeSensorData()
 
 
 #ifdef SHT21_ON
-void GetSHT21SensorData(){
+void GetSHT21SensorData() {
 
   char log[LOGSZ];
   unsigned long start_time = millis();
@@ -319,7 +333,7 @@ void GetDhtSensorData()
 #ifdef DS18X20_ON
 void SearchDS18x20Sensors() {
 
-  if (searchDsSensorDone){
+  if (searchDsSensorDone) {
     return;
   }
 
@@ -350,17 +364,17 @@ void SearchDS18x20Sensors() {
   switch (dsData[currentDsSensor].address[0])
   {
     case 0x10:
-        dsData[currentDsSensor].type = DS18S20;
-        break;
+      dsData[currentDsSensor].type = DS18S20;
+      break;
     case 0x28:
-        dsData[currentDsSensor].type = DS18B20;
-        break;
+      dsData[currentDsSensor].type = DS18B20;
+      break;
     case 0x22:
-        dsData[currentDsSensor].type = DS1822;
-        break;
+      dsData[currentDsSensor].type = DS1822;
+      break;
     default:
-        dsData[currentDsSensor].type = UNKNOWN;
-        return;
+      dsData[currentDsSensor].type = UNKNOWN;
+      return;
   }
   currentDsSensor ++;
 
@@ -371,9 +385,9 @@ void SearchDS18x20Sensors() {
 
 
 
-void GetDS18x20SensorData(){
+void GetDS18x20SensorData() {
 
-  if (findDsSensors == 0){
+  if (findDsSensors == 0) {
     addLog_P(LOG_LEVEL_ERROR, "DS Sensors Not Found!");
     searchDsSensorDone = false;
     currentDsSensor = 0;
@@ -383,7 +397,7 @@ void GetDS18x20SensorData(){
   byte i;
   byte data[12];
 
-  if (!flag_ds_sensor_read_delay){
+  if (!flag_ds_sensor_read_delay) {
     flag_ds_sensor_read_delay = true;
     ds.reset();
     ds.select(dsData[currentDsSensor].address);
@@ -399,8 +413,8 @@ void GetDS18x20SensorData(){
   ds.write(0xBE);         // Read Scratchpad
 
   for (i = 0; i < 9; i++)
-  {           // we need 9 bytes
-      data[i] = ds.read();
+  { // we need 9 bytes
+    data[i] = ds.read();
   }
 
   if (OneWire::crc8(data, 8) != data[8]) {
@@ -417,8 +431,8 @@ void GetDS18x20SensorData(){
   if (dsData[currentDsSensor].type == DS18S20) {
     raw = raw << 3; // 9 bit resolution default
     if (data[7] == 0x10) {
-        // "count remain" gives full 12 bit resolution
-        raw = (raw & 0xFFF0) + 12 - data[6];
+      // "count remain" gives full 12 bit resolution
+      raw = (raw & 0xFFF0) + 12 - data[6];
     }
   } else if (dsData[currentDsSensor].type == DS18B20 || dsData[currentDsSensor].type == DS1822) {
     byte cfg = (data[4] & 0x60);
@@ -438,8 +452,8 @@ void GetDS18x20SensorData(){
 
 
 
-void nextDsSensor(){
-  if (findDsSensors == currentDsSensor+1){
+void nextDsSensor() {
+  if (findDsSensors == currentDsSensor + 1) {
     currentDsSensor = 0;
   } else {
     currentDsSensor ++;
@@ -448,7 +462,7 @@ void nextDsSensor(){
 
 
 
-void dsDataPrint(){
+void dsDataPrint() {
 
   char log[LOGSZ];
   unsigned long start_time = millis();
@@ -610,8 +624,8 @@ int GetMHZ19() {
 
   unsigned long startTime = millis();
   uint8_t len = 0;
-  while((len < RESPONSE_SIZE) && (millis() - startTime < READ_TIMEOUT)) {
-    if(Serial.available() > 0) {
+  while ((len < RESPONSE_SIZE) && (millis() - startTime < READ_TIMEOUT)) {
+    if (Serial.available() > 0) {
       Serial.readBytes(data, RESPONSE_SIZE);
     }
   }
@@ -639,7 +653,7 @@ int GetMHZ19() {
 
 
 
-void MotionDetect(){
+void MotionDetect() {
 
   char log[LOGSZ];
   unsigned long start_time = millis();
@@ -652,7 +666,7 @@ void MotionDetect(){
     if (atoi(JConf.mqtt_enable) == 1 && mqtt.connected()) {
       pubTopicMotionSensor.publish("1");
     }
-  } else if (motionDetect){
+  } else if (motionDetect) {
     motionDetect = false;
     if (atoi(JConf.mqtt_enable) == 1 && mqtt.connected()) {
       pubTopicMotionSensor.publish("0");
@@ -666,32 +680,32 @@ void MotionDetect(){
 
 
 
-String GetUptimeData(){
+String GetUptimeData() {
 
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: GetUptimeData Start");
 
   //** Making Note of an expected rollover *****//
-  if(millis()>=3000000000){
-    HighMillis=1;
+  if (millis() >= 3000000000) {
+    HighMillis = 1;
   }
   //** Making note of actual rollover **//
-  if(millis()<=100000&&HighMillis==1){
+  if (millis() <= 100000 && HighMillis == 1) {
     Rollover++;
-    HighMillis=0;
+    HighMillis = 0;
   }
 
-  long secsUp = millis()/1000;
-  Second = secsUp%60;
-  Minute = (secsUp/60)%60;
-  Hour = (secsUp/(60*60))%24;
-  Day = (Rollover*50)+(secsUp/(60*60*24));  //First portion takes care of a rollover [around 50 days]
+  long secsUp = millis() / 1000;
+  Second = secsUp % 60;
+  Minute = (secsUp / 60) % 60;
+  Hour = (secsUp / (60 * 60)) % 24;
+  Day = (Rollover * 50) + (secsUp / (60 * 60 * 24)); //First portion takes care of a rollover [around 50 days]
 
   sprintf_P(value_buff, (const char *)F("%dd %02d:%02d"), Day, Hour, Minute);
   uptimeString = String(value_buff);
 
-  snprintf_P(log, sizeof(log), PSTR("GetUptimeData: Uptime: %s:%d%d"), uptimeString.c_str(), Second/10, Second%10);
+  snprintf_P(log, sizeof(log), PSTR("GetUptimeData: Uptime: %s:%d%d"), uptimeString.c_str(), Second / 10, Second % 10);
   addLog(LOG_LEVEL_INFO, log);
 
   unsigned long load_time = millis() - start_time;
@@ -704,13 +718,13 @@ String GetUptimeData(){
 
 
 #ifdef NTP_ON
-void NTPSettingsUpdate(){
+void NTPSettingsUpdate() {
   if (atoi(JConf.ntp_enable) == 1) {
     ntpLastUpdateTime = millis();
     timeClient.end();
     timeClient.setUpdateServer(JConf.ntp_server);
     timeClient.setTimeOffset(atoi(JConf.my_time_zone) * 60 * 60);
-    timeClient.setUpdateInterval(60*60*1000);
+    timeClient.setUpdateInterval(60 * 60 * 1000);
     timeClient.begin();
   }
 }
@@ -786,19 +800,19 @@ void MqttInit() {
   sprintf(pressure_buff, "%s%s%s", JConf.publish_topic, pressure, JConf.mqtt_name);
   pubTopicPressure = Adafruit_MQTT_Publish(&mqtt, pressure_buff);
 
-  #ifdef PZEM_ON
-    sprintf(pzemVoltage_buff, "%s%s%s", JConf.publish_topic, pzemVoltage, JConf.mqtt_name);
-    pubTopicPzemVoltage = Adafruit_MQTT_Publish(&mqtt, pzemVoltage_buff);
+#ifdef PZEM_ON
+  sprintf(pzemVoltage_buff, "%s%s%s", JConf.publish_topic, pzemVoltage, JConf.mqtt_name);
+  pubTopicPzemVoltage = Adafruit_MQTT_Publish(&mqtt, pzemVoltage_buff);
 
-    sprintf(pzemCurrent_buff, "%s%s%s", JConf.publish_topic, pzemCurrent, JConf.mqtt_name);
-    pubTopicPzemCurrent = Adafruit_MQTT_Publish(&mqtt, pzemCurrent_buff);
+  sprintf(pzemCurrent_buff, "%s%s%s", JConf.publish_topic, pzemCurrent, JConf.mqtt_name);
+  pubTopicPzemCurrent = Adafruit_MQTT_Publish(&mqtt, pzemCurrent_buff);
 
-    sprintf(pzemPower_buff, "%s%s%s", JConf.publish_topic, pzemPower, JConf.mqtt_name);
-    pubTopicPzemPower = Adafruit_MQTT_Publish(&mqtt, pzemPower_buff);
+  sprintf(pzemPower_buff, "%s%s%s", JConf.publish_topic, pzemPower, JConf.mqtt_name);
+  pubTopicPzemPower = Adafruit_MQTT_Publish(&mqtt, pzemPower_buff);
 
-    sprintf(pzemEnergy_buff, "%s%s%s", JConf.publish_topic, pzemEnergy, JConf.mqtt_name);
-    pubTopicPzemEnergy = Adafruit_MQTT_Publish(&mqtt, pzemEnergy_buff);
-  #endif //PZEM_ON
+  sprintf(pzemEnergy_buff, "%s%s%s", JConf.publish_topic, pzemEnergy, JConf.mqtt_name);
+  pubTopicPzemEnergy = Adafruit_MQTT_Publish(&mqtt, pzemEnergy_buff);
+#endif //PZEM_ON
 
   sprintf(mhz19ppm_buff, "%s%s%s", JConf.publish_topic, mhz19ppm, JConf.mqtt_name);
   pubTopicMhz19ppm = Adafruit_MQTT_Publish(&mqtt, mhz19ppm_buff);
@@ -834,10 +848,10 @@ void MqttInit() {
   sprintf(uptime_buff_sub, "%s%s%s", JConf.command_pub_topic, uptime, JConf.mqtt_name);
   subTopicUptime = Adafruit_MQTT_Subscribe(&mqtt, uptime_buff_sub);
 
-  #ifdef PZEM_ON
-    sprintf(pzemReset_buff_sub, "%s%s%s", JConf.command_pub_topic, pzemReset, JConf.mqtt_name);
-    subTopicPzemReset = Adafruit_MQTT_Subscribe(&mqtt, pzemReset_buff_sub);
-  #endif //PZEM_ON
+#ifdef PZEM_ON
+  sprintf(pzemReset_buff_sub, "%s%s%s", JConf.command_pub_topic, pzemReset, JConf.mqtt_name);
+  subTopicPzemReset = Adafruit_MQTT_Subscribe(&mqtt, pzemReset_buff_sub);
+#endif //PZEM_ON
 }
 
 
@@ -859,7 +873,7 @@ void MqttInitDS() {
 
 
 
-bool MqttPubLightState(){
+bool MqttPubLightState() {
 
   if (atoi(JConf.mqtt_enable) != 1) {
     return false;
@@ -869,24 +883,24 @@ bool MqttPubLightState(){
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: MqttPubLightState Start");
 
-  if (!mqtt.connected()){
+  if (!mqtt.connected()) {
     addLog_P(LOG_LEVEL_ERROR, "MqttPubLightState: MQTT not connected!");
     return false;
   }
 
   String lightStateNum;
-  if (lightState == "ON"){
+  if (lightState == "ON") {
     lightStateNum = String(F("1"));
-  } else if (lightState == "OFF"){
+  } else if (lightState == "OFF") {
     lightStateNum = String(F("0"));
   } else {
     lightStateNum = String(F("2"));
   }
   pubTopicLightType.publish(lightStateNum.c_str());
 
-  if (lightState2 == "ON"){
+  if (lightState2 == "ON") {
     lightStateNum = String(F("1"));
-  } else if (lightState2 == "OFF"){
+  } else if (lightState2 == "OFF") {
     lightStateNum = String(F("0"));
   } else {
     lightStateNum = String(F("2"));
@@ -912,7 +926,7 @@ bool MqttPubLightOffDelay() {
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: MqttPubLightState Start");
 
-  if (!mqtt.connected()){
+  if (!mqtt.connected()) {
     addLog_P(LOG_LEVEL_ERROR, "MqttPubLightOffDelay: MQTT not connected!");
     return false;
   }
@@ -939,21 +953,21 @@ bool MqttPubData() {
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: MqttPubData Start");
 
-  if (!mqtt.connected()){
+  if (!mqtt.connected()) {
     addLog_P(LOG_LEVEL_ERROR, "MqttPubData: MQTT not connected!");
     return false;
   }
 
-  if (atoi(JConf.bh1750_enable) == 1){
+  if (atoi(JConf.bh1750_enable) == 1) {
     pubTopicLux.publish(luxString.c_str());
   }
 
-  if (atoi(JConf.bme280_enable) == 1  ||  atoi(JConf.sht21_enable) == 1 ||  atoi(JConf.dht_enable) == 1){
+  if (atoi(JConf.bme280_enable) == 1  ||  atoi(JConf.sht21_enable) == 1 ||  atoi(JConf.dht_enable) == 1) {
     pubTopicTemperature.publish(temperatureString.c_str());
     pubTopicHumidity.publish(humidityString.c_str());
   }
 
-  if (atoi(JConf.bme280_enable) == 1){
+  if (atoi(JConf.bme280_enable) == 1) {
     pubTopicPressure.publish(pressureString.c_str());
   }
 
@@ -963,29 +977,29 @@ bool MqttPubData() {
   pubTopicIp.publish(ipString.c_str());
   pubTopicMac.publish(macString.c_str());
 
-  #ifdef PZEM_ON
-    if (atoi(JConf.pzem_enable) == 1){
-      pubTopicPzemVoltage.publish(pzemVoltageString.c_str());
-      pubTopicPzemCurrent.publish(pzemCurrentString.c_str());
-      pubTopicPzemPower.publish(pzemPowerString.c_str());
-      pubTopicPzemEnergy.publish(pzemEnergyString.c_str());
-    }
-  #endif
+#ifdef PZEM_ON
+  if (atoi(JConf.pzem_enable) == 1) {
+    pubTopicPzemVoltage.publish(pzemVoltageString.c_str());
+    pubTopicPzemCurrent.publish(pzemCurrentString.c_str());
+    pubTopicPzemPower.publish(pzemPowerString.c_str());
+    pubTopicPzemEnergy.publish(pzemEnergyString.c_str());
+  }
+#endif
 
-  #ifdef MHZ19_ON
-    if (atoi(JConf.mhz19_enable) == 1){
-      pubTopicMhz19ppm.publish(mhz19PpmString.c_str());
-    }
-  #endif
+#ifdef MHZ19_ON
+  if (atoi(JConf.mhz19_enable) == 1) {
+    pubTopicMhz19ppm.publish(mhz19PpmString.c_str());
+  }
+#endif
 
-  #ifdef DS18X20_ON
-    if (atoi(JConf.ds18x20_enable) == 1){
-      for (size_t i = 0; i < findDsSensors; i++) {
-        if (i == MAX_DS_SENSORS) break;
-        dsData[i].pubTopic.publish(dsData[i].dsTemp.c_str());
-      }
+#ifdef DS18X20_ON
+  if (atoi(JConf.ds18x20_enable) == 1) {
+    for (size_t i = 0; i < findDsSensors; i++) {
+      if (i == MAX_DS_SENSORS) break;
+      dsData[i].pubTopic.publish(dsData[i].dsTemp.c_str());
     }
-  #endif //DS18X20_ON
+  }
+#endif //DS18X20_ON
 
   unsigned long load_time = millis() - start_time;
   snprintf_P(log, sizeof(log), PSTR("Func: MqttPubData load time: %d"), load_time);
@@ -1034,11 +1048,11 @@ void CallbackLightType(char *data, uint16_t len) {
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: CallbackLightType Start");
 
-  if (strncmp (data,"1",1) == 0){
+  if (strncmp (data, "1", 1) == 0) {
     lightState = "ON";
-  } else if (strncmp (data,"0",1) == 0){
+  } else if (strncmp (data, "0", 1) == 0) {
     lightState = "OFF";
-  } else if (strncmp (data,"2",1) == 0){
+  } else if (strncmp (data, "2", 1) == 0) {
     lightState = "AUTO";
   }
 
@@ -1057,11 +1071,11 @@ void CallbackLightType2(char *data, uint16_t len) {
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: CallbackLightType2 Start");
 
-  if (strncmp (data,"1",1) == 0){
+  if (strncmp (data, "1", 1) == 0) {
     lightState2 = "ON";
-  } else if (strncmp (data,"0",1) == 0){
+  } else if (strncmp (data, "0", 1) == 0) {
     lightState2 = "OFF";
-  } else if (strncmp (data,"2",1) == 0){
+  } else if (strncmp (data, "2", 1) == 0) {
     lightState2 = "AUTO";
   }
 
@@ -1081,7 +1095,7 @@ void CallbackPzemReset(char *data, uint16_t len) {
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: CallbackPzemReset Start");
 
-  if (strncmp (data,"ON",1) == 0){
+  if (strncmp (data, "ON", 1) == 0) {
     PzemResetEnergy();
   }
 
@@ -1101,9 +1115,9 @@ void CallbackUptime(char *data, uint16_t len) {
 
   timer.restartTimer(subscribeTimer);
 
-  #ifdef REBOOT_ON
-    timer.restartTimer(rebootTimer);
-  #endif
+#ifdef REBOOT_ON
+  timer.restartTimer(rebootTimer);
+#endif
 
   unsigned long load_time = millis() - start_time;
   snprintf_P(log, sizeof(log), PSTR("Func: CallbackUptime load time: %d"), load_time);
@@ -1112,7 +1126,7 @@ void CallbackUptime(char *data, uint16_t len) {
 
 
 
-void MqttSubscribe(){
+void MqttSubscribe() {
 
   if (atoi(JConf.mqtt_enable) != 1) {
     return;
@@ -1134,12 +1148,12 @@ void MqttSubscribe(){
   mqtt.subscribe(&subTopicLightType2);
   mqtt.subscribe(&subTopicUptime);
 
-  #ifdef PZEM_ON
-    if (atoi(JConf.pzem_enable) == 1){
-      subTopicPzemReset.setCallback(CallbackPzemReset);
-      mqtt.subscribe(&subTopicPzemReset);
-    }
-  #endif
+#ifdef PZEM_ON
+  if (atoi(JConf.pzem_enable) == 1) {
+    subTopicPzemReset.setCallback(CallbackPzemReset);
+    mqtt.subscribe(&subTopicPzemReset);
+  }
+#endif
 
   unsigned long load_time = millis() - start_time;
   snprintf_P(log, sizeof(log), PSTR("Func: MqttSubscribe load time: %d"), load_time);
@@ -1182,82 +1196,82 @@ void TestSystemPrint()
 
 
 
-void getData(){
+void getData() {
 
-  #ifdef NTP_ON
-    if (atoi(JConf.ntp_enable) == 1) {
-      ntpTimeString = timeClient.getFormattedTime();
-    }
-  #endif
+#ifdef NTP_ON
+  if (atoi(JConf.ntp_enable) == 1) {
+    ntpTimeString = timeClient.getFormattedTime();
+  }
+#endif
 
   int voltage = ESP.getVcc();
   voltage_float = voltage / 1000.0;
 
-  #ifdef BH1750_ON
-    if (atoi(JConf.bh1750_enable) == 1){
-      GetLightSensorData();
-    }
-  #endif
+#ifdef BH1750_ON
+  if (atoi(JConf.bh1750_enable) == 1) {
+    GetLightSensorData();
+  }
+#endif
 
-  #ifdef BME280_ON
-    if (atoi(JConf.bme280_enable) == 1){
-      GetBmeSensorData();
-    }
-  #endif
+#ifdef BME280_ON
+  if (atoi(JConf.bme280_enable) == 1) {
+    GetBmeSensorData();
+  }
+#endif
 
-  #ifdef SHT21_ON
-    if (atoi(JConf.sht21_enable) == 1){
-      GetSHT21SensorData();
-    }
-  #endif
+#ifdef SHT21_ON
+  if (atoi(JConf.sht21_enable) == 1) {
+    GetSHT21SensorData();
+  }
+#endif
 
-  #ifdef DHT_ON
-    if (atoi(JConf.dht_enable) == 1){
-      GetDhtSensorData();
-    }
-  #endif
+#ifdef DHT_ON
+  if (atoi(JConf.dht_enable) == 1) {
+    GetDhtSensorData();
+  }
+#endif
 
-  #ifdef DS18X20_ON
-  if (atoi(JConf.ds18x20_enable) == 1){
-    if (searchDsSensorDone){
+#ifdef DS18X20_ON
+  if (atoi(JConf.ds18x20_enable) == 1) {
+    if (searchDsSensorDone) {
       GetDS18x20SensorData();
     } else {
       SearchDS18x20Sensors();
     }
   }
-  #endif //DS18X20_ON
+#endif //DS18X20_ON
 
-  #ifdef PZEM_ON
-    if (atoi(JConf.pzem_enable) == 1){
-      GetPzemSerialRead();
-    }
-  #endif
+#ifdef PZEM_ON
+  if (atoi(JConf.pzem_enable) == 1) {
+    GetPzemSerialRead();
+  }
+#endif
 
-  #ifdef MHZ19_ON
-    if (atoi(JConf.mhz19_enable) == 1){
-      GetMHZ19();
-    }
-  #endif
+#ifdef MHZ19_ON
+  if (atoi(JConf.mhz19_enable) == 1) {
+    GetMHZ19();
+  }
+#endif
 
   GetUptimeData();
   GetFreeMemory();
   TestSystemPrint();
 
-  #ifdef LCD_ON
-    //scanI2C();
-    lcd.clear();
-    lcd.setCursor(1, 1);
-    lcd.print("Test");
-  #endif
+#ifdef LCD_ON
+  //scanI2C();
+  lcd.clear();
+  lcd.setCursor(1, 1);
+  lcd.print("Test");
+#endif
 
-  #ifdef UART_ON
-  for (int i = 0; i < ANALOG_PINS; i++){
-    if (millis() - Uart.timerAnalogPin[i] >= 60000){
+#ifdef UART_ON
+  for (int i = 0; i < ANALOG_PINS; i++) {
+    if (millis() - Uart.timerAnalogPin[i] >= 60000) {
       Uart.valueAnalogPin[i] = 0;
       Uart.SetAnalogReadCycle(i, 10, "s");
     }
   }
-  #endif
+#endif
 }
 
 
@@ -1269,7 +1283,7 @@ void scanI2C() {
   int nDevices;
   nDevices = 0;
 
-  for(address = 1; address < 127; address++ ) {
+  for (address = 1; address < 127; address++ ) {
     // The i2c_scanner uses the return value of
     // the Write.endTransmisstion to see if
     // a device did acknowledge to the address.
@@ -1280,7 +1294,7 @@ void scanI2C() {
       snprintf_P(log, sizeof(log), PSTR("I2C device found at address 0x%x !"), address);
       addLog(LOG_LEVEL_INFO, log);
       nDevices++;
-    } else if (error==4) {
+    } else if (error == 4) {
       snprintf_P(log, sizeof(log), PSTR("Unknown error at address 0x%x !"), address);
       addLog(LOG_LEVEL_ERROR, log);
     }
@@ -1302,9 +1316,9 @@ void setup() {
     addLog_P(LOG_LEVEL_NONE, "setup: Failed to mount file system");
     return;
   } else {
-    #ifdef RESET_BUTTON_ON
-      deleteConfigFile();
-    #endif
+#ifdef RESET_BUTTON_ON
+    deleteConfigFile();
+#endif
   }
 
   //JConf.deleteConfig();
@@ -1315,7 +1329,7 @@ void setup() {
     addLog_P(LOG_LEVEL_NONE, "setup: Config loaded");
   }
 
-  if (atoi(JConf.pzem_enable)==1 || atoi(JConf.mhz19_enable)==1){
+  if (atoi(JConf.pzem_enable) == 1 || atoi(JConf.mhz19_enable) == 1) {
     JConf.serial_log_level[0] = '0'; // Отключаем serial log
     JConf.serial_log_level[1] = '\0';
     Serial.end();
@@ -1341,17 +1355,17 @@ void setup() {
   }
   delay(300);
 
-  #ifdef PZEM_ON
-    pzem.setAddress(ip_pzem);
-    pzem.setReadTimeout(500);
-  #endif
+#ifdef PZEM_ON
+  pzem.setAddress(ip_pzem);
+  pzem.setReadTimeout(500);
+#endif
 
-  #ifdef DHT_ON
-    dht = DHT(atoi(JConf.dht_pin), DHTTYPE);
-    dht.begin();
-  #endif
+#ifdef DHT_ON
+  dht = DHT(atoi(JConf.dht_pin), DHTTYPE);
+  dht.begin();
+#endif
 
-  #ifdef BME280_ON
+#ifdef BME280_ON
   if (atoi(JConf.bme280_enable) == 1) {
     bmeSensor.settings.commInterface = I2C_MODE;
     bmeSensor.settings.I2CAddress = 0x76;
@@ -1363,35 +1377,35 @@ void setup() {
     bmeSensor.settings.humidOverSample = 5;
     bmeSensor.begin();
   }
-  #endif
+#endif
 
-  #ifdef BH1750_ON
-    if (atoi(JConf.bh1750_enable) == 1) {
-      lightSensor.begin();
-    }
-  #endif
+#ifdef BH1750_ON
+  if (atoi(JConf.bh1750_enable) == 1) {
+    lightSensor.begin();
+  }
+#endif
 
   if (atoi(JConf.bme280_enable) == 1 || atoi(JConf.bh1750_enable) == 1 || atoi(JConf.sht21_enable) == 1) {
     Wire.setClock(100000);
   }
 
-  #ifdef SHT21_ON
-    myHTU21D.begin(4, 5);  //SDA=4, SCL=5
-  #endif
+#ifdef SHT21_ON
+  myHTU21D.begin(4, 5);  //SDA=4, SCL=5
+#endif
 
-  #ifdef LCD_ON
-    lcd.init();
-    lcd.backlight();
-    lcd.setCursor(0, 1);
-    lcd.print("Test");
-  #endif //LCD_ON
+#ifdef LCD_ON
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 1);
+  lcd.print("Test");
+#endif //LCD_ON
 
-  #ifdef ENCODER_ON
-    encoderSetup();
-  #endif //ENCODER_ON
+#ifdef ENCODER_ON
+  encoderSetup();
+#endif //ENCODER_ON
 
   if (atoi(JConf.mqtt_enable) == 1) {
-    if (atoi(JConf.mqtt_auth_enable) == 1){
+    if (atoi(JConf.mqtt_auth_enable) == 1) {
       mqtt = Adafruit_MQTT_Client(&espClient, JConf.mqtt_server, atoi(JConf.mqtt_port), JConf.mqtt_user, JConf.mqtt_pwd);
     } else {
       mqtt = Adafruit_MQTT_Client(&espClient, JConf.mqtt_server, atoi(JConf.mqtt_port));
@@ -1401,16 +1415,16 @@ void setup() {
     MqttConnect();
   }
 
-  #ifdef USE_WEBSERVER
-    WebServerInit();
-  #endif // USE_WEBSERVER
+#ifdef USE_WEBSERVER
+  WebServerInit();
+#endif // USE_WEBSERVER
 
-  #ifdef NTP_ON
-    if (atoi(JConf.ntp_enable) == 1) {
-      NTPSettingsUpdate();
-      ntpTimer = timer.setInterval(NTP_TIME_SLEEP, NTPSettingsUpdate);
-    }
-  #endif
+#ifdef NTP_ON
+  if (atoi(JConf.ntp_enable) == 1) {
+    NTPSettingsUpdate();
+    ntpTimer = timer.setInterval(NTP_TIME_SLEEP, NTPSettingsUpdate);
+  }
+#endif
 
   wifiReconnectTimer = timer.setInterval(10000, wifiReconnect);
   timer.setInterval(atoi(JConf.get_data_delay) * 1000, getData);
@@ -1418,7 +1432,7 @@ void setup() {
   timer.setInterval(60000, MqttConnect);
   timer.setInterval(atoi(JConf.publish_delay) * 1000, MqttPubData);
 
-  if (atoi(JConf.motion_sensor_enable) == 1){
+  if (atoi(JConf.motion_sensor_enable) == 1) {
     lightState =  "AUTO";
     lightState2 = "AUTO";
     timer.setInterval(atoi(JConf.motion_read_delay) * 1000, MotionDetect);
@@ -1427,9 +1441,9 @@ void setup() {
   subscribeTimer = timer.setInterval(atoi(JConf.subscribe_delay) * 1000, MqttSubscribe);
   timer.setInterval(600000, wifiSafeModeReconnect);
 
-  #ifdef REBOOT_ON
-    rebootTimer = timer.setInterval(atoi(JConf.reboot_delay) * 1000, restartESP);
-  #endif
+#ifdef REBOOT_ON
+  rebootTimer = timer.setInterval(atoi(JConf.reboot_delay) * 1000, restartESP);
+#endif
 
   GetMacString();
 }
@@ -1441,38 +1455,38 @@ void loop() {
   if (fading[0].cycleEnd != fading[0].cycleNow || fading[1].cycleEnd != fading[1].cycleNow) {
     FadeSwitchLoop();
   } else {
-    #ifdef USE_WEBSERVER
-      WebServer.handleClient();  // handle web server
-    #endif // USE_WEBSERVER
+#ifdef USE_WEBSERVER
+    WebServer.handleClient();  // handle web server
+#endif // USE_WEBSERVER
 
     timer.run();
 
     if (WiFi.status() == WL_CONNECTED && atoi(JConf.mqtt_enable) == 1) {
-      if (mqtt.connected()){
+      if (mqtt.connected()) {
         mqtt.processPackets(100);
       }
     }
 
-    if (atoi(JConf.motion_sensor_enable) == 1 && motionDetect == false){
+    if (atoi(JConf.motion_sensor_enable) == 1 && motionDetect == false) {
       MotionDetect();
     }
 
-    if (lightState == "AUTO" || lightState2 == "AUTO"){
+    if (lightState == "AUTO" || lightState2 == "AUTO") {
       LightControl();
     }
 
-    #ifdef UART_ON
-      Uart.serialEvent();
-    #endif
+#ifdef UART_ON
+    Uart.serialEvent();
+#endif
 
   }
 
-  #ifdef NTP_ON
-    if ( atoi(JConf.ntp_enable) == 1 && millis() - ntpLastUpdateTime < NTP_ERROR_TIME ) {
-      if (timeClient.update()) ntpLastUpdateTime = millis();
-      timer.restartTimer(ntpTimer);
-    }
-  #endif
+#ifdef NTP_ON
+  if ( atoi(JConf.ntp_enable) == 1 && millis() - ntpLastUpdateTime < NTP_ERROR_TIME ) {
+    if (timeClient.update()) ntpLastUpdateTime = millis();
+    timer.restartTimer(ntpTimer);
+  }
+#endif
 
   yield();
 }

@@ -81,8 +81,11 @@ bool JsonConf::saveConfig() {
   json["pzem_enable"]                   = pzem_enable                  ;
   json["mhz19_enable"]                  = mhz19_enable                 ;
   json["ds18x20_enable"]                = ds18x20_enable               ;
-
-
+  
+  json["light_start_time"]              = light_start_time             ;
+  json["light_stop_time"]               = light_stop_time              ;
+  json["light2_start_time"]             = light2_start_time            ;
+  json["light2_stop_time"]              = light2_stop_time             ;
 
 
   File configFile = SPIFFS.open(ConfigFileName, "w");
