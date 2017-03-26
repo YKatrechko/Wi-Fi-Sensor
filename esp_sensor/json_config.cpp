@@ -191,9 +191,9 @@ bool JsonConf::loadConfig() {
 
   if (json.containsKey("sys_log_host"                  )) {  const char* sys_log_host_char                  = json["sys_log_host"                 ];    sprintf_P(sys_log_host,                  ("%s"), sys_log_host_char                 ); }
   if (json.containsKey("sys_log_port"                  )) {  const char* sys_log_port_char                  = json["sys_log_port"                 ];    sprintf_P(sys_log_port,                  ("%s"), sys_log_port_char                 ); }
-  if (json.containsKey("sys_log_level"                  )) {  const char* sys_log_level_char                  = json["sys_log_level"                 ];    sprintf_P(sys_log_level,                  ("%s"), sys_log_level_char                 ); }
-  if (json.containsKey("serial_log_level"                  )) {  const char* serial_log_level_char                  = json["serial_log_level"                 ];    sprintf_P(serial_log_level,                  ("%s"), serial_log_level_char                 ); }
-  if (json.containsKey("web_log_level"                  )) {  const char* web_log_level_char                  = json["web_log_level"                 ];    sprintf_P(web_log_level,                  ("%s"), web_log_level_char                 ); }
+  if (json.containsKey("sys_log_level"                 )) {  const char* sys_log_level_char                 = json["sys_log_level"                ];    sprintf_P(sys_log_level,                 ("%s"), sys_log_level_char                ); }
+  if (json.containsKey("serial_log_level"              )) {  const char* serial_log_level_char              = json["serial_log_level"             ];    sprintf_P(serial_log_level,              ("%s"), serial_log_level_char             ); }
+  if (json.containsKey("web_log_level"                 )) {  const char* web_log_level_char                 = json["web_log_level"                ];    sprintf_P(web_log_level,                 ("%s"), web_log_level_char                ); }
 
 /*
   if (json.containsKey("uart_delay_analog_pin0"        )) {  const char* uart_delay_analog_pin0_char        = json["uart_delay_analog_pin0"       ];    sprintf_P(uart_delay_analog_pin0,        ("%s"), uart_delay_analog_pin0_char       ); }
@@ -222,6 +222,11 @@ bool JsonConf::loadConfig() {
   if (json.containsKey("mhz19_enable"                  )) {  const char* mhz19_enable_char                  = json["mhz19_enable"                 ];    sprintf_P(mhz19_enable,                  ("%s"), mhz19_enable_char                 ); }
   if (json.containsKey("dht_enable"                    )) {  const char* dht_enable_char                    = json["dht_enable"                   ];    sprintf_P(dht_enable,                    ("%s"), dht_enable_char                   ); }
   if (json.containsKey("ds18x20_enable"                )) {  const char* ds18x20_enable_char                = json["ds18x20_enable"               ];    sprintf_P(ds18x20_enable,                ("%s"), ds18x20_enable_char               ); }
+
+  if (json.containsKey("light_start_time"              )) {  const char* light_start_time_char              = json["light_start_time"             ];    sprintf_P(light_start_time,              ("%s"), light_start_time_char             ); }
+  if (json.containsKey("light_stop_time"               )) {  const char* light_stop_time_char               = json["light_stop_time"              ];    sprintf_P(light_stop_time,               ("%s"), light_stop_time_char              ); }
+  if (json.containsKey("light2_start_time"             )) {  const char* light2_start_time_char             = json["light2_start_time"            ];    sprintf_P(light2_start_time,             ("%s"), light2_start_time_char            ); }
+  if (json.containsKey("light2_stop_time"              )) {  const char* light2_stop_time_char              = json["light2_stop_time"             ];    sprintf_P(light2_stop_time,              ("%s"), light2_stop_time_char             ); }
 
   configFile.close();
   return true;
@@ -305,4 +310,9 @@ bool JsonConf::printConfig() {
   Serial.print(F("mhz19_enable                 : "));   Serial.println(mhz19_enable                 );
   Serial.print(F("dht_enable                   : "));   Serial.println(dht_enable                   );
   Serial.print(F("ds18x20_enable               : "));   Serial.println(ds18x20_enable               );
+  Serial.print(F("light_start_time             : "));   Serial.println(light_start_time             );
+  Serial.print(F("light_stop_time              : "));   Serial.println(light_stop_time              );
+  Serial.print(F("light2_start_time            : "));   Serial.println(light2_start_time            );
+  Serial.print(F("light2_stop_time             : "));   Serial.println(light2_stop_time             );
+ 
 }

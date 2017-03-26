@@ -199,25 +199,25 @@ void LightControl() {
     PWMChange(0, 1023);
   } else if (lightState == OFF) {
     PWMChange(0, 0);
-  } else if (lightState == AUTO {
-    if (check_worktime(worktime[0]) && (atoi(JConf.bh1750_enable) == 0 || (atoi(JConf.bh1750_enable) == 1 && luxString.toInt() < atoi(JConf.lighton_lux))) {
+  } else if (lightState == AUTO) {
+    if (check_worktime(worktime[0]) && (atoi(JConf.bh1750_enable) == 0 || (atoi(JConf.bh1750_enable) == 1 && luxString.toInt() < atoi(JConf.lighton_lux)))) {
       PWMChange(0, 1023);
       lightOffTimer = millis();
     } else if (fading[0].cycleEnd != 0) {
-      if (millis() - lightOffTimer >= atoi(JConf.lightoff_delay) * 60UL * 1000UL) 
+      if (millis() - lightOffTimer >= atoi(JConf.lightoff_delay) * 60UL * 1000UL)
         PWMChange(0, 0);
     }
   }
 
   if (lightState2 == ON) {
-  PWMChange(1, 1023);
+    PWMChange(1, 1023);
   } else if (lightState2 == OFF) {
-  PWMChange(1, 0);
+    PWMChange(1, 0);
   } else if (lightState2 == AUTO && motionDetect == true && luxString.toInt() < atoi(JConf.light2on_lux)) {
-  PWMChange(1, 1023);
+    PWMChange(1, 1023);
     lightOffTimer2 = millis();
   } else if (lightState2 == AUTO && motionDetect == false && fading[1].cycleEnd != 0) {
-  if (millis() - lightOffTimer2 >= atoi(JConf.light2off_delay) * 60UL * 1000UL) {
+    if (millis() - lightOffTimer2 >= atoi(JConf.light2off_delay) * 60UL * 1000UL) {
       PWMChange(1, 0);
     }
   }

@@ -133,7 +133,7 @@ const char HTTP_FORM_INPUT_TXT_TIME[] PROGMEM =
   "</div>"
   "<script>"
   "$(function() {"
-  "$('#{id}').timepicker({ 'scrollDefault': 'now', 'timeFormat': 'H:i', 'step': 30, 'forceRoundTime': true, 'show2400': true });"
+  "$('#{id}').timepicker({ 'scrollDefault': 'now', 'timeFormat': 'H:i', 'step': 1, 'forceRoundTime': true, 'show2400': true });"
   "$('#{icon}').on('click', function(){$('#{id}').timepicker('show');});"
   "});"
   "</script>"
@@ -1388,13 +1388,13 @@ void handleEspConfig()
   form += FPSTR(HTTP_FORM_INPUT_TXT_TIME);
   form.replace("{id}", "light_start_time");
   form.replace("{name}", "Start Time");
-  form.replace("{value}", String(JConf.lightoff_delay));
+  form.replace("{value}", String(JConf.light_start_time));
   form.replace("{icon}", "light_start_time_icon");
 
   form += FPSTR(HTTP_FORM_INPUT_TXT_TIME);
   form.replace("{id}", "light_stop_time");
   form.replace("{name}", "Stop Time");
-  form.replace("{value}", String(JConf.lightoff_delay));
+  form.replace("{value}", String(JConf.light_stop_time));
   form.replace("{icon}", "light_stop_time_icon");
 
   if (atoi(JConf.bh1750_enable) == 1) {
@@ -1429,13 +1429,13 @@ void handleEspConfig()
   form += FPSTR(HTTP_FORM_INPUT_TXT_TIME);
   form.replace("{id}", "light2_start_time");
   form.replace("{name}", "Start Time");
-  form.replace("{value}", String(JConf.lightoff_delay));
+  form.replace("{value}", String(JConf.light2_start_time));
   form.replace("{icon}", "light2_start_time_icon");
 
   form += FPSTR(HTTP_FORM_INPUT_TXT_TIME);
   form.replace("{id}", "light2_stop_time");
   form.replace("{name}", "Stop Time");
-  form.replace("{value}", String(JConf.lightoff_delay));
+  form.replace("{value}", String(JConf.light2_stop_time));
   form.replace("{icon}", "light2_stop_time_icon");
 
   if (atoi(JConf.bh1750_enable) == 1) {
@@ -1563,7 +1563,11 @@ void handleWifiScan()
   showPage(network_html);
 }
 
-
+unsigned int worktime_tominute(char* str) {
+  char hours[3] = {str[0], str[1]};
+  char minutes[3] = {str[3], str[4]};
+  return atoi(hours) * 60 + atoi(minutes);
+}
 
 void handleSave()
 {
@@ -1698,13 +1702,12 @@ void handleSave()
       strlcpy(JConf.lighton_lux, (!strlen(WebServer.arg("lighton_lux").c_str())) ? JConf.lighton_lux : WebServer.arg("lighton_lux").c_str(), sizeof(JConf.lighton_lux));
       strlcpy(JConf.light_start_time, (!strlen(WebServer.arg("light_start_time").c_str())) ? JConf.light_start_time : WebServer.arg("light_start_time").c_str(), sizeof(JConf.light_start_time));
       strlcpy(JConf.light_stop_time, (!strlen(WebServer.arg("light_stop_time").c_str())) ? JConf.light_stop_time : WebServer.arg("light_stop_time").c_str(), sizeof(JConf.light_stop_time));
-       
+
       if (strstr(WebServer.arg("light_smooth").c_str(), "1")) {
         strlcpy(JConf.light_smooth, "1", sizeof(JConf.light_smooth));
       } else {
         strlcpy(JConf.light_smooth, "0", sizeof(JConf.light_smooth));
       }
-
 
       strlcpy(JConf.light2_pin, (!strlen(WebServer.arg("light2_pin").c_str())) ? JConf.light2_pin : WebServer.arg("light2_pin").c_str(), sizeof(JConf.light2_pin));
       strlcpy(JConf.light2off_delay, (!strlen(WebServer.arg("light2off_delay").c_str())) ? JConf.light2off_delay : WebServer.arg("light2off_delay").c_str(), sizeof(JConf.light2off_delay));
@@ -1723,6 +1726,11 @@ void handleSave()
       strlcpy(JConf.get_data_delay, (!strlen(WebServer.arg("get_data_delay").c_str())) ? JConf.get_data_delay : WebServer.arg("get_data_delay").c_str(), sizeof(JConf.get_data_delay));
       strlcpy(JConf.motion_read_delay, (!strlen(WebServer.arg("motion_read_delay").c_str())) ? JConf.motion_read_delay : WebServer.arg("motion_read_delay").c_str(), sizeof(JConf.motion_read_delay));
       strlcpy(JConf.reboot_delay, (!strlen(WebServer.arg("reboot_delay").c_str())) ? JConf.reboot_delay : WebServer.arg("reboot_delay").c_str(), sizeof(JConf.reboot_delay));
+
+      worktime[0].start_midn_minutes = worktime_tominute(JConf.light_start_time);
+      worktime[0].stop_midn_minutes = worktime_tominute(JConf.light_stop_time);
+      worktime[1].start_midn_minutes = worktime_tominute(JConf.light2_start_time);
+      worktime[1].stop_midn_minutes = worktime_tominute(JConf.light2_stop_time);
 
       JConf.saveConfig();
       handleEspConfig();

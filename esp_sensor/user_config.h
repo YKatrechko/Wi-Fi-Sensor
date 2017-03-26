@@ -249,7 +249,7 @@ char pzemReset_buff_sub[MQTTSZ];
 
 struct WORKTIME_T
 {
-  unsigned int state;
+  unsigned int update;
   unsigned int start_midn_minutes;
   unsigned int stop_midn_minutes;
 } worktime[2] = {
