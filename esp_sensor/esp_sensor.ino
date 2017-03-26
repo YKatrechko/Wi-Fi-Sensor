@@ -169,17 +169,18 @@ void encoderReadPinB() {
 }
 #endif //ENCODER_ON
 
+
 //  String hoursStr = hours < 10 ? "0" + String(hours) : String(hours);
 //  String minuteStr = minutes < 10 ? "0" + String(minutes) : String(minutes);
-bool validate_worktime(WORKTIME_T wtime) {
+bool check_worktime(WORKTIME_T wtime) {
 #ifdef NTP_ON
   if (atoi(JConf.ntp_enable) == 1 && timeClient.update()) {
     unsigned long rawTime = timeClient.getEpochTime();
     unsigned int midnight_minutes = (rawTime % 86400L) / 60;
-    if ((wtime.start_midn_minutes < wtime.stop_midn_minutes && midnight_minutes < wtime.start_midn_minutes) // A interv 2
-        || (wtime.start_midn_minutes > wtime.stop_midn_minutes && midnight_minutes > wtime.start_midn_minutes && midnight_minutes < wtime.stop_midn_minutes))   // B interv 1 3
+    if ((wtime.start_midn_minutes < wtime.stop_midn_minutes && (midnight_minutes < wtime.start_midn_minutes || midnight_minutes > wtime.stop_midn_minutes))     // case A interv 1 3
+        || (wtime.start_midn_minutes > wtime.stop_midn_minutes && midnight_minutes > wtime.start_midn_minutes && midnight_minutes < wtime.stop_midn_minutes))   // case B interv 2
       return false;
-    }
+  }
 #endif
   return true;
 }
@@ -198,24 +199,25 @@ void LightControl() {
     PWMChange(0, 1023);
   } else if (lightState == OFF) {
     PWMChange(0, 0);
-  } else if (lightState == AUTO && luxString.toInt() < atoi(JConf.lighton_lux)) {
-    PWMChange(0, 1023);
-    lightOffTimer = millis();
-  } else if (lightState == AUTO && fading[0].cycleEnd != 0) {
-    if (millis() - lightOffTimer >= atoi(JConf.lightoff_delay) * 60UL * 1000UL) {
-      PWMChange(0, 0);
+  } else if (lightState == AUTO {
+    if (check_worktime(worktime[0]) && (atoi(JConf.bh1750_enable) == 0 || (atoi(JConf.bh1750_enable) == 1 && luxString.toInt() < atoi(JConf.lighton_lux))) {
+      PWMChange(0, 1023);
+      lightOffTimer = millis();
+    } else if (fading[0].cycleEnd != 0) {
+      if (millis() - lightOffTimer >= atoi(JConf.lightoff_delay) * 60UL * 1000UL) 
+        PWMChange(0, 0);
     }
   }
 
   if (lightState2 == ON) {
-    PWMChange(1, 1023);
+  PWMChange(1, 1023);
   } else if (lightState2 == OFF) {
-    PWMChange(1, 0);
+  PWMChange(1, 0);
   } else if (lightState2 == AUTO && motionDetect == true && luxString.toInt() < atoi(JConf.light2on_lux)) {
-    PWMChange(1, 1023);
+  PWMChange(1, 1023);
     lightOffTimer2 = millis();
   } else if (lightState2 == AUTO && motionDetect == false && fading[1].cycleEnd != 0) {
-    if (millis() - lightOffTimer2 >= atoi(JConf.light2off_delay) * 60UL * 1000UL) {
+  if (millis() - lightOffTimer2 >= atoi(JConf.light2off_delay) * 60UL * 1000UL) {
       PWMChange(1, 0);
     }
   }
@@ -497,7 +499,7 @@ void dsDataPrint() {
 
 
 #if defined(PZEM_ON)
-bool GetPzemData(float data, String *val) {
+bool GetPzemData(float data, String * val) {
 
   char log[LOGSZ];
   unsigned long start_time = millis();

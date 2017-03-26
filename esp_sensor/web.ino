@@ -1386,16 +1386,16 @@ void handleEspConfig()
   form.replace("{value}", String(JConf.light_pin));
 
   form += FPSTR(HTTP_FORM_INPUT_TXT_TIME);
-  form.replace("{id}", "light_start");
+  form.replace("{id}", "light_start_time");
   form.replace("{name}", "Start Time");
   form.replace("{value}", String(JConf.lightoff_delay));
-  form.replace("{icon}", "light_start_icon");
+  form.replace("{icon}", "light_start_time_icon");
 
   form += FPSTR(HTTP_FORM_INPUT_TXT_TIME);
-  form.replace("{id}", "light_stop");
+  form.replace("{id}", "light_stop_time");
   form.replace("{name}", "Stop Time");
   form.replace("{value}", String(JConf.lightoff_delay));
-  form.replace("{icon}", "light_stop_icon");
+  form.replace("{icon}", "light_stop_time_icon");
 
   if (atoi(JConf.bh1750_enable) == 1) {
     form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
@@ -1417,7 +1417,7 @@ void handleEspConfig()
   if (atoi(JConf.light_smooth) == 1) {
     form.replace("id='light_smooth'", "checked='true' id='light_smooth'");
   }
-///////////////////////
+
   form += String(F("<hr>"));
   form += String(F("<h4>Light 2</h4>"));
 
@@ -1427,16 +1427,16 @@ void handleEspConfig()
   form.replace("{value}", String(JConf.light2_pin));
 
   form += FPSTR(HTTP_FORM_INPUT_TXT_TIME);
-  form.replace("{id}", "light2_start");
+  form.replace("{id}", "light2_start_time");
   form.replace("{name}", "Start Time");
   form.replace("{value}", String(JConf.lightoff_delay));
-  form.replace("{icon}", "light2_start_icon");
+  form.replace("{icon}", "light2_start_time_icon");
 
   form += FPSTR(HTTP_FORM_INPUT_TXT_TIME);
-  form.replace("{id}", "light2_stop");
+  form.replace("{id}", "light2_stop_time");
   form.replace("{name}", "Stop Time");
   form.replace("{value}", String(JConf.lightoff_delay));
-  form.replace("{icon}", "light2_stop_icon");
+  form.replace("{icon}", "light2_stop_time_icon");
 
   if (atoi(JConf.bh1750_enable) == 1) {
     form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
@@ -1696,16 +1696,21 @@ void handleSave()
       strlcpy(JConf.light_pin, (!strlen(WebServer.arg("light_pin").c_str())) ? JConf.light_pin : WebServer.arg("light_pin").c_str(), sizeof(JConf.light_pin));
       strlcpy(JConf.lightoff_delay, (!strlen(WebServer.arg("lightoff_delay").c_str())) ? JConf.lightoff_delay : WebServer.arg("lightoff_delay").c_str(), sizeof(JConf.lightoff_delay));
       strlcpy(JConf.lighton_lux, (!strlen(WebServer.arg("lighton_lux").c_str())) ? JConf.lighton_lux : WebServer.arg("lighton_lux").c_str(), sizeof(JConf.lighton_lux));
-
+      strlcpy(JConf.light_start_time, (!strlen(WebServer.arg("light_start_time").c_str())) ? JConf.light_start_time : WebServer.arg("light_start_time").c_str(), sizeof(JConf.light_start_time));
+      strlcpy(JConf.light_stop_time, (!strlen(WebServer.arg("light_stop_time").c_str())) ? JConf.light_stop_time : WebServer.arg("light_stop_time").c_str(), sizeof(JConf.light_stop_time));
+       
       if (strstr(WebServer.arg("light_smooth").c_str(), "1")) {
         strlcpy(JConf.light_smooth, "1", sizeof(JConf.light_smooth));
       } else {
         strlcpy(JConf.light_smooth, "0", sizeof(JConf.light_smooth));
       }
 
+
       strlcpy(JConf.light2_pin, (!strlen(WebServer.arg("light2_pin").c_str())) ? JConf.light2_pin : WebServer.arg("light2_pin").c_str(), sizeof(JConf.light2_pin));
       strlcpy(JConf.light2off_delay, (!strlen(WebServer.arg("light2off_delay").c_str())) ? JConf.light2off_delay : WebServer.arg("light2off_delay").c_str(), sizeof(JConf.light2off_delay));
       strlcpy(JConf.light2on_lux, (!strlen(WebServer.arg("light2on_lux").c_str())) ? JConf.light2on_lux : WebServer.arg("light2on_lux").c_str(), sizeof(JConf.light2on_lux));
+      strlcpy(JConf.light2_start_time, (!strlen(WebServer.arg("light2_start_time").c_str())) ? JConf.light2_start_time : WebServer.arg("light2_start_time").c_str(), sizeof(JConf.light2_start_time));
+      strlcpy(JConf.light2_stop_time, (!strlen(WebServer.arg("light2_stop_time").c_str())) ? JConf.light2_stop_time : WebServer.arg("light2_stop_time").c_str(), sizeof(JConf.light2_stop_time));
 
       if (strstr(WebServer.arg("light2_smooth").c_str(), "1")) {
         strlcpy(JConf.light2_smooth, "1", sizeof(JConf.light2_smooth));
