@@ -21,14 +21,14 @@ class JsonConf
     char wifi_phy_mode                [4]  = "11G"                ;
     char wifi_channel                 [3]  = "12"                 ;
     char wifi_auth                    [13]  = "WPA2_PSK"          ;
-    char sta_ssid                     [32] = "IoT"                ;
-    char sta_pwd                      [32] = "Poiu0987"           ;
+    char sta_ssid                     [32] = "AAA0"               ;
+    char sta_pwd                      [32] = "WPA7305023"         ;
     char ap_pwd                       [32] = "Poiu0987"           ;
     char static_ip                    [16] = "192.168.2.220"      ;
     char static_gateway               [16] = "192.168.2.1"        ;
     char static_subnet                [16] = "255.255.255.0"      ;
     char ntp_server                   [32] = "europe.pool.ntp.org";
-    char my_time_zone                 [4]  = "+6"                 ;
+    char my_time_zone                 [4]  = "+3"                 ;
     char mqtt_server                  [32] = "192.168.2.205"      ;
     char mqtt_port                    [6]  = "1883"               ;
     char mqtt_user                    [32] = "none"               ;
@@ -59,8 +59,8 @@ class JsonConf
     char sys_log_host                 [33] = "192.168.2.50"       ;
     char sys_log_port                 [6]  = "514"                ;
     char sys_log_level                [2]  = "0"                  ;
-    char serial_log_level             [2]  = "0"                  ;
-    char web_log_level                [2]  = "0"                  ;
+    char serial_log_level             [2]  = "3"                  ;
+    char web_log_level                [2]  = "2"                  ;
 
     char uart_delay_analog_pin0       [32] = "none"               ;
     char uart_delay_analog_pin1       [32] = "none"               ;
@@ -77,7 +77,7 @@ class JsonConf
     char green_pump_pin               [3]  = "33"                 ;
 
     char static_ip_enable             [2]  = "0"                  ;
-    char ntp_enable                   [2]  = "0"                  ;
+    char ntp_enable                   [2]  = "1"                  ;
     char mqtt_enable                  [2]  = "0"                  ;
     char mqtt_auth_enable             [2]  = "0"                  ;
     char dht_enable                   [2]  = "0"                  ;

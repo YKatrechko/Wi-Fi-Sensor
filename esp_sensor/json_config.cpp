@@ -102,6 +102,8 @@ bool JsonConf::saveConfig() {
 #endif
   json.printTo(configFile);
   configFile.close();
+  Serial.println(F("Finished to open config file for writing"));
+
   return true;
 }
 

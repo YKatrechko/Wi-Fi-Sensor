@@ -173,10 +173,22 @@ void encoderReadPinB() {
 //  String hoursStr = hours < 10 ? "0" + String(hours) : String(hours);
 //  String minuteStr = minutes < 10 ? "0" + String(minutes) : String(minutes);
 bool check_worktime(WORKTIME_T wtime) {
+  char log[LOGSZ];
+  unsigned long start_time = millis();
+  addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: check_worktime Start");
+
 #ifdef NTP_ON
   if (atoi(JConf.ntp_enable) == 1 && timeClient.update()) {
     unsigned long rawTime = timeClient.getEpochTime();
     unsigned int midnight_minutes = (rawTime % 86400L) / 60;
+    snprintf_P(log, sizeof(log), PSTR("Midnight Minutes: %d"), midnight_minutes);
+    addLog(LOG_LEVEL_DEBUG, log);
+
+    snprintf_P(log, sizeof(log), PSTR("START Minutes: %d"), wtime.start_midn_minutes);
+    addLog(LOG_LEVEL_DEBUG, log);
+    snprintf_P(log, sizeof(log), PSTR("STOP Minutes: %d"), wtime.stop_midn_minutes);
+    addLog(LOG_LEVEL_DEBUG, log);
+
     if ((wtime.start_midn_minutes < wtime.stop_midn_minutes && (midnight_minutes < wtime.start_midn_minutes || midnight_minutes > wtime.stop_midn_minutes))     // case A interv 1 3
         || (wtime.start_midn_minutes > wtime.stop_midn_minutes && midnight_minutes > wtime.start_midn_minutes && midnight_minutes < wtime.stop_midn_minutes))   // case B interv 2
       return false;
@@ -733,6 +745,18 @@ void NTPSettingsUpdate() {
 #endif
 
 
+unsigned int worktime_tominute(char* str) {
+  char hours[3] = {str[0], str[1]};
+  char minutes[3] = {str[3], str[4]};
+  return atoi(hours) * 60 + atoi(minutes);
+}
+
+void WorkTimeSettingsUpdate() {
+  worktime[0].start_midn_minutes = worktime_tominute(JConf.light_start_time);
+  worktime[0].stop_midn_minutes = worktime_tominute(JConf.light_stop_time);
+  worktime[1].start_midn_minutes = worktime_tominute(JConf.light2_start_time);
+  worktime[1].stop_midn_minutes = worktime_tominute(JConf.light2_stop_time);
+}
 
 bool MqttConnect() {
 
@@ -1428,17 +1452,16 @@ void setup() {
   }
 #endif
 
+
   wifiReconnectTimer = timer.setInterval(10000, wifiReconnect);
   timer.setInterval(atoi(JConf.get_data_delay) * 1000, getData);
 
   timer.setInterval(60000, MqttConnect);
   timer.setInterval(atoi(JConf.publish_delay) * 1000, MqttPubData);
 
-  if (atoi(JConf.motion_sensor_enable) == 1) {
-    lightState =  "AUTO";
-    lightState2 = "AUTO";
-    timer.setInterval(atoi(JConf.motion_read_delay) * 1000, MotionDetect);
-  }
+  lightState =  "AUTO";
+  lightState2 = "AUTO";
+  WorkTimeSettingsUpdate();
 
   subscribeTimer = timer.setInterval(atoi(JConf.subscribe_delay) * 1000, MqttSubscribe);
   timer.setInterval(600000, wifiSafeModeReconnect);
@@ -1453,7 +1476,7 @@ void setup() {
 
 
 void loop() {
-
+  static unsigned long previousMillis;
   if (fading[0].cycleEnd != fading[0].cycleNow || fading[1].cycleEnd != fading[1].cycleNow) {
     FadeSwitchLoop();
   } else {
@@ -1473,8 +1496,12 @@ void loop() {
       MotionDetect();
     }
 
+
     if (lightState == "AUTO" || lightState2 == "AUTO") {
-      LightControl();
+      if (millis() - previousMillis >= 1000) {
+        LightControl();
+        previousMillis = previousMillis + 1000;
+      }
     }
 
 #ifdef UART_ON

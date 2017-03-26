@@ -1563,12 +1563,6 @@ void handleWifiScan()
   showPage(network_html);
 }
 
-unsigned int worktime_tominute(char* str) {
-  char hours[3] = {str[0], str[1]};
-  char minutes[3] = {str[3], str[4]};
-  return atoi(hours) * 60 + atoi(minutes);
-}
-
 void handleSave()
 {
   char log[LOGSZ];
@@ -1727,11 +1721,7 @@ void handleSave()
       strlcpy(JConf.motion_read_delay, (!strlen(WebServer.arg("motion_read_delay").c_str())) ? JConf.motion_read_delay : WebServer.arg("motion_read_delay").c_str(), sizeof(JConf.motion_read_delay));
       strlcpy(JConf.reboot_delay, (!strlen(WebServer.arg("reboot_delay").c_str())) ? JConf.reboot_delay : WebServer.arg("reboot_delay").c_str(), sizeof(JConf.reboot_delay));
 
-      worktime[0].start_midn_minutes = worktime_tominute(JConf.light_start_time);
-      worktime[0].stop_midn_minutes = worktime_tominute(JConf.light_stop_time);
-      worktime[1].start_midn_minutes = worktime_tominute(JConf.light2_start_time);
-      worktime[1].stop_midn_minutes = worktime_tominute(JConf.light2_stop_time);
-
+      WorkTimeSettingsUpdate();
       JConf.saveConfig();
       handleEspConfig();
       break;
@@ -1920,7 +1910,7 @@ void WebPinControlStatus(void) {
   }
   data += String(F("'></div></td>"));
 
-  if (atoi(JConf.motion_sensor_enable) == 1) {
+// if (atoi(JConf.motion_sensor_enable) == 1) {
     data += String(F("<td class='active'><div onclick='Auto1();'><input id='Auto' type='submit' class='btn btn-"));
     if (lightState == AUTO) {
       data += ClassDanger;
@@ -1928,9 +1918,9 @@ void WebPinControlStatus(void) {
       data += ClassDefault;
     }
     data += String(F("' value='Auto'></div></td>"));
-  } else {
-    data += String(F("<td class='active'></td>"));
-  }
+//  } else {
+//    data += String(F("<td class='active'></td>"));
+//  }
   data += String(F("<td class='"));
   if (pinState) {
     data += ClassInfo;
@@ -1977,7 +1967,7 @@ void WebPinControlStatus(void) {
   }
   data += String(F("'></div></td>"));
 
-  if (atoi(JConf.motion_sensor_enable) == 1) {
+//  if (atoi(JConf.motion_sensor_enable) == 1) {
     data += String(F("<td class='active'><div onclick='Auto2();'><input id='Auto2' type='submit' class='btn btn-"));
     if (lightState2 == AUTO) {
       data += ClassDanger;
@@ -1985,9 +1975,9 @@ void WebPinControlStatus(void) {
       data += ClassDefault;
     }
     data += String(F("' value='Auto'></div></td>"));
-  } else {
-    data += String(F("<td class='active'></td>"));
-  }
+//  } else {
+//    data += String(F("<td class='active'></td>"));
+//  }
   data += String(F("<td class='"));
   if (pinState2) {
     data += ClassInfo;
