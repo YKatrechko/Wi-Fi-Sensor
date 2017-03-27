@@ -260,7 +260,7 @@ bool WiFiSetup() {
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: WiFiSetup Start");
 
-  wifi_set_sleep_type ((sleep_type_t)NONE_SLEEP_T);   // NONE_SLEEP_T,LIGHT_SLEEP_T,MODEM_SLEEP_T
+  wifi_set_sleep_type ((sleep_type_t)NONE_SLEEP_T);   // NONE_SLEEP_T,light1_sLEEP_T,MODEM_SLEEP_T
   WiFi.disconnect();
   if ( String(JConf.wifi_mode) == String(AP) ) { //JConf.wifi_mode == AP
     wifiAP();
@@ -461,68 +461,6 @@ bool isIPValid(const char * IP) {
 
   return true;
 }
-
-
-
-void PWMChange(int pin, int bright) {
-
-  char log[LOGSZ];
-  unsigned long start_time = millis();
-  addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: PWMChange Start");
-
-  fading[pin].cycleEnd = bright;
-
-  if ( ( atoi(JConf.light_smooth) == 0 && fading[pin].pin == atoi(JConf.light_pin) )   ||   ( atoi(JConf.light2_smooth) == 0 && fading[pin].pin == atoi(JConf.light2_pin) ) ){
-    if (fading[pin].cycleNow < fading[pin].cycleEnd){
-      fading[pin].cycleNow = 1022;
-    } else if (fading[pin].cycleNow > fading[pin].cycleEnd){
-      fading[pin].cycleNow = 1;
-    }
-  }
-
-  unsigned long load_time = millis() - start_time;
-  snprintf_P(log, sizeof(log), PSTR("Func: PWMChange load time: %d"), load_time);
-  addLog(LOG_LEVEL_DEBUG_MORE, log);
-}
-
-
-
-void FadeSwitchDelay(int pin){
-
-  char log[LOGSZ];
-
-  if (millis() - fading[pin].timerFade >= fading[pin].delayFade && fading[pin].cycleNow != fading[pin].cycleEnd){
-    fading[pin].timerFade = millis();
-    if (fading[pin].cycleNow < fading[pin].cycleEnd){
-      fading[pin].cycleNow = constrain(fading[pin].cycleNow + 10, 0, 1023);
-    } else if (fading[pin].cycleNow > fading[pin].cycleEnd){
-      fading[pin].cycleNow = constrain(fading[pin].cycleNow - 10, 0, 1023);
-    }
-    analogWrite(fading[pin].pin, fading[pin].cycleNow);
-
-    snprintf_P(log, sizeof(log), PSTR("FadeSwitchDelay: PWM pin: %d, PWM Value: %d"), pin, fading[pin].cycleNow);
-    addLog(LOG_LEVEL_DEBUG_MORE, log);
-  }
-}
-
-
-/*
-void FadeSwitchLoop(){
-  for ( size_t i = 0; i < FADE_PINS; i++ ){
-    FadeSwitchDelay(i);
-  }
-}
-*/
-void FadeSwitchLoop(){
-  if (fading[0].cycleEnd != fading[0].cycleNow) {
-    FadeSwitchDelay(0);
-    fading[1].timerFade = millis();
-  } else {
-    FadeSwitchDelay(1);
-  }
-}
-
-
 
 void restartESP() {
   addLog_P(LOG_LEVEL_INFO, "restartESP: Restart ESP!");

@@ -3,8 +3,6 @@
 //#define STR_HELPER(x) #x
 //#define STR(x) STR_HELPER(x)
 
-
-
 /////////////////////////////////////////////////////////////     HTML SNIPPLETS
 
 const char div1P[] PROGMEM =
@@ -17,20 +15,17 @@ const char div1P[] PROGMEM =
     <td class='active'><h4>Status</h4></td>\
     <td class='active'><h4>Mode</h4></td>";
 
-const char div2P[] PROGMEM =
+const char div2Pin[] PROGMEM =
   "</tr>\
   <tr>\
-    <td class='active'><h4>Light1</h4></td>\
-    <td class='active'><div onclick='Pin1();'><input id='OnOff' type='submit' class='btn btn-";
+    <td class='active'><h4>{title}</h4></td>\
+    <td class='active'><div onclick='Pin({pin},{val});'><input type='submit' class='btn btn-";
 
 const char ClassInfoP[] PROGMEM  = "info";
 const char ClassDangerP[] PROGMEM  = "danger";
 const char ClassDefaultP[] PROGMEM  = "default";
 const char ClassSuccessP[] PROGMEM  = "success";
 
-const char AUTOP[] PROGMEM  = "AUTO";
-const char ONP[] PROGMEM  = "ON";
-const char OFFP[] PROGMEM  = "OFF";
 
 
 /******************************************************************************\
@@ -165,13 +160,6 @@ const char HTTP_BODY_END[] PROGMEM =
   "</div>"
   "</body>"
   "</html>";
-/*********************************************************************************************\
-
-                                                                                      Template
-
-  \*********************************************************************************************/
-
-
 
 /*********************************************************************************************\
 
@@ -298,13 +286,6 @@ const char HTTP_FORM_LOG[] PROGMEM =
   "</form>"
   "<div class='clearfix visible-lg'></div>"
   "</div>";
-/*********************************************************************************************\
-
-                                                                     For Web Page <Log Config>
-
-  \*********************************************************************************************/
-
-
 
 /*********************************************************************************************\
 
@@ -354,29 +335,19 @@ const char JS_CONSOLE[] PROGMEM =
   "</script>";
 /*********************************************************************************************\
 
-                                                                        For Web Page <Console>
+  For Web Page <Console>
 
   \*********************************************************************************************/
 
 
 const char JS_PIN_CONTROL[] PROGMEM =
   "<div id='content'></div>"
-  "<div id='pin1'></div>"
   "<script>"
   "function show(){"
   "$.ajax({url:'controlstatus', cache: false, success: function(html){$('#content').html(html);}});"
   "}"
-  "function Pin1(){"
-  "$.ajax({type:'POST', url:'control', data:'1=1', success:function(data){show();}});"
-  "}"
-  "function Auto1(){"
-  "$.ajax({type:'POST', url:'control', data:'1=2', success:function(data){show();}});"
-  "}"
-  "function Pin2(){"
-  "$.ajax({type:'POST', url:'control', data:'2=1', success:function(data){show();}});"
-  "}"
-  "function Auto2(){"
-  "$.ajax({type:'POST', url:'control', data:'2=2', success:function(data){show();}});"
+  "function Pin(p,v){"
+  "$.ajax({type:'POST', url:'control', data:p+'='+v, success:function(data){show();}});"
   "}"
   "$(document).ready(function(){show(); setInterval('show()',5000);});"
   "</script>";
@@ -396,7 +367,7 @@ const char HTTP_UPDATE[] PROGMEM  =
   "<h3>Update Frimware</h3>"
   "<form method='POST' action='/upload_sketch' enctype='multipart/form-data'>"
   "<p><input type='file' class='btn btn-primary' name='sketch'></p>"
-  "<h3><small>Выберите файл формата *.bin</small></h3>"
+  "<h3><small>Select *.bin file</small></h3>"
   "<p><input type='submit' value='Upload' class='btn btn-danger'></p>"
   "</form>"
   "</div>";
@@ -583,14 +554,9 @@ const char JS_MQTT_SETTINGS[] PROGMEM =
   "});"
   "</script>";
 
-
-
-void showPage(String &page)
-{
+void showPage(String &page) {
   WebServer.send(200, "text/html", page);
 }
-
-
 
 String getContentType(String filename) {
   if (WebServer.hasArg("download")) return "application/octet-stream";
@@ -609,8 +575,6 @@ String getContentType(String filename) {
   else if (filename.endsWith(".gz")) return "application/x-gzip";
   return "text/plain";
 }
-
-
 
 bool handleFileRead(String path, bool cache = false) {
   if (path.endsWith("/")) path += "index.htm";
@@ -633,8 +597,6 @@ bool handleFileRead(String path, bool cache = false) {
   return false;
 }
 
-
-
 File fsUploadFile;
 
 void handleFileUpload() {
@@ -655,8 +617,6 @@ void handleFileUpload() {
   }
 }
 
-
-
 void handleFileDelete() {
   if (WebServer.args() == 0) return WebServer.send(500, "text/plain", "BAD ARGS");
   String path = WebServer.arg(0);
@@ -668,8 +628,6 @@ void handleFileDelete() {
   WebServer.send(200, "text/plain", "");
   path = String();
 }
-
-
 
 void handleFileCreate() {
   if (WebServer.args() == 0)
@@ -687,8 +645,6 @@ void handleFileCreate() {
   WebServer.send(200, "text/plain", "");
   path = String();
 }
-
-
 
 void handleFileList() {
   if (!WebServer.hasArg("dir")) {
@@ -713,8 +669,6 @@ void handleFileList() {
   output += "]";
   WebServer.send(200, "text/json", output);
 }
-
-
 
 String httpHead() {
   String head = FPSTR(HTTP_HEAD);
@@ -741,10 +695,7 @@ String httpHead() {
   return head;
 }
 
-
-
-void handleRoot()
-{
+void handleRoot() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: handleRoot Start");
@@ -758,8 +709,6 @@ void handleRoot()
   //JavaScript//////////////////////////////////////////////////////////////////////////////////////////////
   String js = FPSTR(JS_ROOT_START);
   js.replace("{update_delay}", String(atoi(JConf.get_data_delay) * 1000).c_str());
-
-
 
   if (atoi(JConf.bme280_enable) == 1 || atoi(JConf.sht21_enable) == 1 || atoi(JConf.dht_enable) == 1) {
     js += FPSTR(JS_ROOT_XML);
@@ -787,7 +736,6 @@ void handleRoot()
     }
   }
 #endif //DS18X20_ON
-
 
 #ifdef PZEM_ON
   if (atoi(JConf.pzem_enable) == 1) {
@@ -861,7 +809,6 @@ void handleRoot()
     }
   }
 #endif //DS18X20_ON
-
 
 #ifdef PZEM_ON
   if (atoi(JConf.pzem_enable) == 1) {
@@ -943,10 +890,7 @@ void handleRoot()
   showPage(page);
 }
 
-
-
-void handleLogConfig()
-{
+void handleLogConfig() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: handleLogConfig Start");
@@ -977,12 +921,8 @@ void handleLogConfig()
   showPage(page);
 }
 
-
-
-void handleConsole()
-{
+void handleConsole() {
   char svalue[MESSZ];
-
   addLog_P(LOG_LEVEL_DEBUG, PSTR("HTTP: Handle console"));
 
   if (strlen(WebServer.arg(SUB_PREFIX).c_str())) {
@@ -1005,10 +945,7 @@ void handleConsole()
   showPage(page);
 }
 
-
-
-void handleAjax()
-{
+void handleAjax() {
   String message = "";
 
   byte counter = logidx;  // Points to oldest entry
@@ -1026,10 +963,7 @@ void handleAjax()
   WebServer.send(200, "text/plain", message);
 }
 
-
-
-void handleReboot()
-{
+void handleReboot() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: handleReboot Start");
@@ -1050,10 +984,7 @@ void handleReboot()
   restartESP();
 }
 
-
-
-void handleUpdate()
-{
+void handleUpdate() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: handleUpdate Start");
@@ -1072,10 +1003,7 @@ void handleUpdate()
   showPage(page);
 }
 
-
-
-void handleUploadSketch()
-{
+void handleUploadSketch() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: handleUploadSketch Start");
@@ -1098,10 +1026,7 @@ void handleUploadSketch()
   restartESP();
 }
 
-
-
 void WebFileUpload(void) {
-
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: WebFileUpload Start");
@@ -1139,22 +1064,16 @@ void WebFileUpload(void) {
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
 
-
-
-void handleSensorsConfig()
-{
+void handleSensorsConfig() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: handleSensorsConfig Start");
 
   String head = httpHead();
-
   String body = FPSTR(HTTP_BODY);
-  body.replace("{module_id}", String(JConf.module_id));
-
-
   String settings = FPSTR(HTTP_SENSORS);
-
+  body.replace("{module_id}", String(JConf.module_id));
+  
   if (atoi(JConf.bme280_enable) == 1) {
     settings.replace("id='bme280_enable'", "checked='true' id='bme280_enable'");
   }
@@ -1193,10 +1112,7 @@ void handleSensorsConfig()
   showPage(page);
 }
 
-
-
-void handleMqttConfig()
-{
+void handleMqttConfig() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: handleMqttConfig Start");
@@ -1287,10 +1203,7 @@ void handleMqttConfig()
   showPage(page);
 }
 
-
-
-void handleNtpConfig()
-{
+void handleNtpConfig() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: handleNtpConfig Start");
@@ -1337,10 +1250,7 @@ void handleNtpConfig()
   showPage(page);
 }
 
-
-
-void handlePinControl()
-{
+void handlePinControl() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: handlePinControl Start");
@@ -1359,10 +1269,7 @@ void handlePinControl()
   showPage(page);
 }
 
-
-
-void handleEspConfig()
-{
+void handleEspConfig() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: handleEspConfig Start");
@@ -1381,41 +1288,41 @@ void handleEspConfig()
   form += String(F("<h4>Light 1</h4>"));
 
   form += FPSTR(HTTP_FORM_INPUT_TXT);
-  form.replace("{id}", "light_pin");
+  form.replace("{id}", "light1_pin");
   form.replace("{name}", "Pin");
-  form.replace("{value}", String(JConf.light_pin));
+  form.replace("{value}", String(JConf.light1_pin));
 
   form += FPSTR(HTTP_FORM_INPUT_TXT_TIME);
-  form.replace("{id}", "light_start_time");
+  form.replace("{id}", "light1_start_time");
   form.replace("{name}", "Start Time");
-  form.replace("{value}", String(JConf.light_start_time));
-  form.replace("{icon}", "light_start_time_icon");
+  form.replace("{value}", String(JConf.light1_start_time));
+  form.replace("{icon}", "light1_start_time_icon");
 
   form += FPSTR(HTTP_FORM_INPUT_TXT_TIME);
-  form.replace("{id}", "light_stop_time");
+  form.replace("{id}", "light1_stop_time");
   form.replace("{name}", "Stop Time");
-  form.replace("{value}", String(JConf.light_stop_time));
-  form.replace("{icon}", "light_stop_time_icon");
+  form.replace("{value}", String(JConf.light1_stop_time));
+  form.replace("{icon}", "light1_stop_time_icon");
 
   if (atoi(JConf.bh1750_enable) == 1) {
     form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
-    form.replace("{id}", "lightoff_delay");
+    form.replace("{id}", "light1_off_delay");
     form.replace("{name}", "Off Delay");
-    form.replace("{value}", String(JConf.lightoff_delay));
+    form.replace("{value}", String(JConf.light1_off_delay));
     form.replace("{unit}", "min");
 
     form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
-    form.replace("{id}", "lighton_lux");
+    form.replace("{id}", "light1_on_lux");
     form.replace("{name}", "On Lux");
-    form.replace("{value}", String(JConf.lighton_lux));
+    form.replace("{value}", String(JConf.light1_on_lux));
     form.replace("{unit}", "Lux");
   }
 
   form += FPSTR(HTTP_FORM_CHECKBOX);
-  form.replace("{id}", "light_smooth");
+  form.replace("{id}", "light1_smooth");
   form.replace("{name}", "Smooth Enable");
-  if (atoi(JConf.light_smooth) == 1) {
-    form.replace("id='light_smooth'", "checked='true' id='light_smooth'");
+  if (atoi(JConf.light1_smooth) == 1) {
+    form.replace("id='light1_smooth'", "checked='true' id='light1_smooth'");
   }
 
   form += String(F("<hr>"));
@@ -1440,15 +1347,15 @@ void handleEspConfig()
 
   if (atoi(JConf.bh1750_enable) == 1) {
     form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
-    form.replace("{id}", "light2off_delay");
+    form.replace("{id}", "light2_off_delay");
     form.replace("{name}", "Off Delay");
-    form.replace("{value}", String(JConf.light2off_delay));
+    form.replace("{value}", String(JConf.light2_off_delay));
     form.replace("{unit}", "min");
 
     form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
-    form.replace("{id}", "light2on_lux");
+    form.replace("{id}", "light2_on_lux");
     form.replace("{name}", "On Lux");
-    form.replace("{value}", String(JConf.light2on_lux));
+    form.replace("{value}", String(JConf.light2_on_lux));
     form.replace("{unit}", "Lux");
   }
 
@@ -1507,12 +1414,9 @@ void handleEspConfig()
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 
   showPage(page);
-}
+} 
 
-
-
-void handleWifiConfig()
-{
+void handleWifiConfig() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: handleWifiConfig Start");
@@ -1546,10 +1450,7 @@ void handleWifiConfig()
   showPage(page);
 }
 
-
-
-void handleWifiScan()
-{
+void handleWifiScan() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: handleWifiScan Start");
@@ -1563,8 +1464,7 @@ void handleWifiScan()
   showPage(network_html);
 }
 
-void handleSave()
-{
+void handleSave() {
   char log[LOGSZ];
   byte what = 0;
 
@@ -1691,21 +1591,21 @@ void handleSave()
       handleNtpConfig();
       break;
     case 5:  //ESP Config save
-      strlcpy(JConf.light_pin, (!strlen(WebServer.arg("light_pin").c_str())) ? JConf.light_pin : WebServer.arg("light_pin").c_str(), sizeof(JConf.light_pin));
-      strlcpy(JConf.lightoff_delay, (!strlen(WebServer.arg("lightoff_delay").c_str())) ? JConf.lightoff_delay : WebServer.arg("lightoff_delay").c_str(), sizeof(JConf.lightoff_delay));
-      strlcpy(JConf.lighton_lux, (!strlen(WebServer.arg("lighton_lux").c_str())) ? JConf.lighton_lux : WebServer.arg("lighton_lux").c_str(), sizeof(JConf.lighton_lux));
-      strlcpy(JConf.light_start_time, (!strlen(WebServer.arg("light_start_time").c_str())) ? JConf.light_start_time : WebServer.arg("light_start_time").c_str(), sizeof(JConf.light_start_time));
-      strlcpy(JConf.light_stop_time, (!strlen(WebServer.arg("light_stop_time").c_str())) ? JConf.light_stop_time : WebServer.arg("light_stop_time").c_str(), sizeof(JConf.light_stop_time));
+      strlcpy(JConf.light1_pin, (!strlen(WebServer.arg("light1_pin").c_str())) ? JConf.light1_pin : WebServer.arg("light1_pin").c_str(), sizeof(JConf.light1_pin));
+      strlcpy(JConf.light1_off_delay, (!strlen(WebServer.arg("light1_off_delay").c_str())) ? JConf.light1_off_delay : WebServer.arg("light1_off_delay").c_str(), sizeof(JConf.light1_off_delay));
+      strlcpy(JConf.light1_on_lux, (!strlen(WebServer.arg("light1_on_lux").c_str())) ? JConf.light1_on_lux : WebServer.arg("light1_on_lux").c_str(), sizeof(JConf.light1_on_lux));
+      strlcpy(JConf.light1_start_time, (!strlen(WebServer.arg("light1_start_time").c_str())) ? JConf.light1_start_time : WebServer.arg("light1_start_time").c_str(), sizeof(JConf.light1_start_time));
+      strlcpy(JConf.light1_stop_time, (!strlen(WebServer.arg("light1_stop_time").c_str())) ? JConf.light1_stop_time : WebServer.arg("light1_stop_time").c_str(), sizeof(JConf.light1_stop_time));
 
-      if (strstr(WebServer.arg("light_smooth").c_str(), "1")) {
-        strlcpy(JConf.light_smooth, "1", sizeof(JConf.light_smooth));
+      if (strstr(WebServer.arg("light1_smooth").c_str(), "1")) {
+        strlcpy(JConf.light1_smooth, "1", sizeof(JConf.light1_smooth));
       } else {
-        strlcpy(JConf.light_smooth, "0", sizeof(JConf.light_smooth));
+        strlcpy(JConf.light1_smooth, "0", sizeof(JConf.light1_smooth));
       }
 
       strlcpy(JConf.light2_pin, (!strlen(WebServer.arg("light2_pin").c_str())) ? JConf.light2_pin : WebServer.arg("light2_pin").c_str(), sizeof(JConf.light2_pin));
-      strlcpy(JConf.light2off_delay, (!strlen(WebServer.arg("light2off_delay").c_str())) ? JConf.light2off_delay : WebServer.arg("light2off_delay").c_str(), sizeof(JConf.light2off_delay));
-      strlcpy(JConf.light2on_lux, (!strlen(WebServer.arg("light2on_lux").c_str())) ? JConf.light2on_lux : WebServer.arg("light2on_lux").c_str(), sizeof(JConf.light2on_lux));
+      strlcpy(JConf.light2_off_delay, (!strlen(WebServer.arg("light2_off_delay").c_str())) ? JConf.light2_off_delay : WebServer.arg("light2_off_delay").c_str(), sizeof(JConf.light2_off_delay));
+      strlcpy(JConf.light2_on_lux, (!strlen(WebServer.arg("light2_on_lux").c_str())) ? JConf.light2_on_lux : WebServer.arg("light2_on_lux").c_str(), sizeof(JConf.light2_on_lux));
       strlcpy(JConf.light2_start_time, (!strlen(WebServer.arg("light2_start_time").c_str())) ? JConf.light2_start_time : WebServer.arg("light2_start_time").c_str(), sizeof(JConf.light2_start_time));
       strlcpy(JConf.light2_stop_time, (!strlen(WebServer.arg("light2_stop_time").c_str())) ? JConf.light2_stop_time : WebServer.arg("light2_stop_time").c_str(), sizeof(JConf.light2_stop_time));
 
@@ -1761,56 +1661,35 @@ void handleSave()
   }
 }
 
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////   WEB PAGES  Start  //////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 void handleControl() {
-
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: handleControl Start");
 
-  String AUTO;       AUTO += FPSTR(AUTOP);
-  String ON;         ON += FPSTR(ONP);
-  String OFF;        OFF += FPSTR(OFFP);
-
-  String last_light_state = lightState;
-  String last_light_state2 = lightState2;
+  String last_light1_state = light1State;
+  String last_light2_state = light2State;
 
   if (WebServer.args() > 0 ) {
     for ( int i = 0; i < WebServer.args(); i++ ) {
-      if (WebServer.argName(i) == "1" && WebServer.arg(i) == "1") {
-        if (fading[0].cycleEnd != 0) {
-          lightState = OFF;
-        } else {
-          lightState = ON;
-        }
-      }
-      if (WebServer.argName(i) == "1" && WebServer.arg(i) == "2") {
-        lightState = OFF;
-        LightControl();
-        lightState = AUTO;
+      if (WebServer.argName(i) == "1") {
+        if (WebServer.arg(i) == "0") light1State = OFF;
+        if (WebServer.arg(i) == "1") light1State = ON;
+        if (WebServer.arg(i) == "2") light1State = AUTO;
       }
 
-      if (WebServer.argName(i) == "2" && WebServer.arg(i) == "1") {
-        if (fading[1].cycleEnd != 0) {
-          lightState2 = OFF;
-        } else {
-          lightState2 = ON;
-        }
+      if (WebServer.argName(i) == "2") {
+        if (WebServer.arg(i) == "0") light2State = OFF;
+        if (WebServer.arg(i) == "1") light2State = ON;
+        if (WebServer.arg(i) == "2") light2State = AUTO;
       }
-      if (WebServer.argName(i) == "2" && WebServer.arg(i) == "2") {
-        lightState2 = OFF;
-        LightControl();
-        lightState2 = AUTO;
-      }
-      if (last_light_state != lightState || last_light_state2 != lightState2) {
-        LightControl();
-        if (atoi(JConf.mqtt_enable) == 1) {
-          MqttPubLightState();
-        }
+      if (last_light1_state != light1State) Light1Control();
+      if (last_light2_state != light2State) Light2Control();
+
+      if (atoi(JConf.mqtt_enable) == 1) {
+        MqttPubLightState();
       }
     }
   }
@@ -1822,208 +1701,119 @@ void handleControl() {
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
 
-
-
-
-
-
 void WebPinControlStatus(void) {
-
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: WebPinControlStatus Start");
+  bool light1pinState, light2pinState;
+  String mode1, mode2;
+  String data;
 
-  LightControl();
-
-  bool pinState;
-  bool pinState2;
+  Light1Control();
+  Light2Control();
 
   String ClassInfo;       ClassInfo += FPSTR(ClassInfoP);
   String ClassDanger;     ClassDanger += FPSTR(ClassDangerP);
   String ClassDefault;    ClassDefault += FPSTR(ClassDefaultP);
   String ClassSuccess;    ClassSuccess += FPSTR(ClassSuccessP);
-  String AUTO;            AUTO += FPSTR(AUTOP);
-  String ON;              ON += FPSTR(ONP);
-  String OFF;             OFF += FPSTR(OFFP);
 
-  if (fading[0].cycleEnd != 0) {
-    pinState = true;
-  } else {
-    pinState = false;
-  }
+  light1pinState = (light1State == OFF) ? false : true;
+  light2pinState = (light2State == OFF) ? false : true;
 
-  if (fading[1].cycleEnd != 0) {
-    pinState2 = true;
-  } else {
-    pinState2 = false;
-  }
+  data += FPSTR(div1P);
+  data += String(F("<td class='active'><h4>Begin</h4></td><td class='active'><h4>End</h4></td>"));
+  data += FPSTR(div2Pin);
+  data.replace("{title}", String(F("Light1")));
+  data.replace("{pin}", String(F("1")));
+  data.replace("{val}", String(!light1pinState));
 
-  String mode;
-  if (lightState == AUTO) {
-    mode = ClassSuccess;
-  } else if (lightState == ON) {
-    mode = ClassInfo;
-  } else {
-    mode = ClassDanger;
-  }
-
-  String mode2;
-  if (lightState2 == AUTO) {
-    mode2 = ClassSuccess;
-  } else if (lightState2 == ON) {
-    mode2 = ClassInfo;
-  } else {
-    mode2 = ClassDanger;
-  }
-
-  unsigned long timeOff = 0;
-  if (millis() - lightOffTimer < atoi(JConf.lightoff_delay) * 60 * 1000UL) {
-    timeOff = atoi(JConf.lightoff_delay) * 60 * 1000 - (millis() - lightOffTimer);
-    timeOff = timeOff / 1000;
-  }
-
-  unsigned long timeOff2 = 0;
-  if (millis() - lightOffTimer2 < atoi(JConf.light2off_delay) * 60 * 1000UL) {
-    timeOff2 = atoi(JConf.light2off_delay) * 60 * 1000 - (millis() - lightOffTimer2);
-    timeOff2 = timeOff2 / 1000;
-  }
-
-  String data;    data += FPSTR(div1P);
-
-  if (atoi(JConf.motion_sensor_enable) == 1) {
-    data += String(F("<td class='active'><h4>Timer</h4></td>"));
-  }
-  data += FPSTR(div2P);
-
-  if (lightState == AUTO) {
+  if (light1State == AUTO) {
     data += ClassDefault;
-  } else if (pinState) {
-    data += ClassDanger;
+    mode1 = ClassSuccess;
   } else {
-    data += ClassInfo;
+    data += light1pinState ? ClassDanger : ClassInfo;
+    mode1 = (light1State == ON) ? ClassInfo : ClassDanger;
   }
-  data += String(F("' value='"));
-  if (pinState) {
-    data += String(F("Turn Off"));
-  } else {
-    data += String(F("Turn On"));
-  }
-  data += String(F("'></div></td>"));
 
-// if (atoi(JConf.motion_sensor_enable) == 1) {
-    data += String(F("<td class='active'><div onclick='Auto1();'><input id='Auto' type='submit' class='btn btn-"));
-    if (lightState == AUTO) {
-      data += ClassDanger;
-    } else {
-      data += ClassDefault;
-    }
-    data += String(F("' value='Auto'></div></td>"));
-//  } else {
-//    data += String(F("<td class='active'></td>"));
-//  }
+  data += String(F("' value='"));
+  data += light1pinState ? String(F("Turn Off")) : String(F("Turn On"));
+  data += String(F("'></div></td>"));
+  data += String(F("<td class='active'><div onclick='Pin(1,2);'><input type='submit' class='btn btn-"));
+  data += (light1State == AUTO) ? ClassDanger : ClassDefault;
+  data += String(F("' value='Auto'></div></td>"));
   data += String(F("<td class='"));
-  if (pinState) {
-    data += ClassInfo;
-  } else {
-    data += ClassDanger;
-  }
+  data += light1pinState ? ClassInfo : ClassDanger;
   data += String(F("'><h4>"));
-  if (pinState) {
-    data += ON;
-  } else {
-    data += OFF;
-  }
+  data += light1pinState ? ON : OFF;
   data += String(F("</h4></td><td class='"));
-  data += mode;
+  data += mode1;
   data += String(F("'><h4>"));
-  data += lightState;
+  data += light1State;
   data += String(F("</h4></td>"));
 
-  if (atoi(JConf.motion_sensor_enable) == 1) {
-    if (lightState == AUTO && pinState == true) {
-      data += String(F("<td class='active'><h4>"));
-      data += String(timeOff);
-      data += String(F("</h4></td>"));
-    } else {
-      data += String(F("<td class='active'></td>"));
-    }
+  if (light1State == AUTO) {
+    data += String(F("<td class='active'><h4>"));
+    data += String(JConf.light1_start_time);
+    data += String(F("</h4></td>"));
+    data += String(F("<td class='active'><h4>"));
+    data += String(JConf.light1_stop_time);
+    data += String(F("</h4></td>"));
+  } else {
+    data += String(F("<td class='active'></td><td class='active'></td>"));
   }
   data += String(F("</tr>"));
 
+  data += FPSTR(div2Pin);
+  data.replace("{title}", String(F("Light2")));
+  data.replace("{pin}", String(F("2")));
+  data.replace("{val}", String(!light2pinState));
 
-  data += String(F("<tr><td class='active'><h4>Light2</h4></td><td class='active'><div onclick='Pin2();'><input id='OnOff2' type='submit' class='btn btn-"));
-  if (lightState2 == AUTO) {
+  if (light2State == AUTO) {
     data += ClassDefault;
-  } else if (pinState2) {
-    data += ClassDanger;
+    mode2 = ClassSuccess;
   } else {
-    data += ClassInfo;
+    data += light2pinState ? ClassDanger : ClassInfo;
+    mode2 = (light2State == ON) ? ClassInfo : ClassDanger;
   }
-  data += String(F("' value='"));
-  if (pinState2) {
-    data += String(F("Turn Off"));
-  } else {
-    data += String(F("Turn On"));
-  }
-  data += String(F("'></div></td>"));
 
-//  if (atoi(JConf.motion_sensor_enable) == 1) {
-    data += String(F("<td class='active'><div onclick='Auto2();'><input id='Auto2' type='submit' class='btn btn-"));
-    if (lightState2 == AUTO) {
-      data += ClassDanger;
-    } else {
-      data += ClassDefault;
-    }
-    data += String(F("' value='Auto'></div></td>"));
-//  } else {
-//    data += String(F("<td class='active'></td>"));
-//  }
+  data += String(F("' value='"));
+  data += light2pinState ? String(F("Turn Off")) : String(F("Turn On"));
+  data += String(F("'></div></td>"));
+  data += String(F("<td class='active'><div onclick='Pin(2,2);'><input type='submit' class='btn btn-"));
+  data += (light2State == AUTO) ? ClassDanger : ClassDefault;
+  data += String(F("' value='Auto'></div></td>"));
   data += String(F("<td class='"));
-  if (pinState2) {
-    data += ClassInfo;
-  } else {
-    data += ClassDanger;
-  }
+  data += light2pinState ? ClassInfo : ClassDanger;
   data += String(F("'><h4>"));
-  if (pinState2) {
-    data += ON;
-  } else {
-    data += OFF;
-  }
+  data += light2pinState ? ON : OFF;
   data += String(F("</h4></td><td class='"));
   data += mode2;
   data += String(F("'><h4>"));
-  data += lightState2;
+  data += light2State;
   data += String(F("</h4></td>"));
 
-  if (atoi(JConf.motion_sensor_enable) == 1) {
-    if (lightState2 == AUTO && pinState2 == true) {
-      data += String(F("<td class='active'><h4>"));
-      data += String(timeOff2);
-      data += String(F("</h4></td>"));
-    } else {
-      data += String(F("<td class='active'></td>"));
-    }
+  if (light2State == AUTO) {
+    data += String(F("<td class='active'><h4>"));
+    data += String(JConf.light2_start_time);
+    data += String(F("</h4></td>"));
+    data += String(F("<td class='active'><h4>"));
+    data += String(JConf.light2_stop_time);
+    data += String(F("</h4></td>"));
+  } else {
+    data += String(F("<td class='active'></td><td class='active'></td>"));
   }
   data += String(F("</tr>"));
   data += String(F("</tbody></table></div>"));
 
-  WebServer.send ( 200, "text/html", data);
+  WebServer.send(200, "text/html", data);
 
   unsigned long load_time = millis() - start_time;
   snprintf_P(log, sizeof(log), PSTR("Func: WebPinControlStatus load time: %d"), load_time);
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
 
-
 ///////////////////////////////////   WEB PAGES  End  //////////////////////////////////////////////
-
-
-
-
-
 void handleXML() {
-
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: handleXML Start");
@@ -2092,7 +1882,6 @@ void handleXML() {
     }
   }
 #endif //DS18X20_ON
-
 
   XML += String(F("<uptime>"));
   XML += uptimeString;

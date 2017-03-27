@@ -151,6 +151,10 @@ bool flag_ds_sensor_read_delay = false;
 enum DS_SENSOR_ENUM {DS18S20, DS18B20, DS1822, UNKNOWN};
 #endif //DS18X20_ON
 
+const char AUTOP[] PROGMEM  = "AUTO";
+const char ONP[] PROGMEM  = "ON";
+const char OFFP[] PROGMEM  = "OFF";
+
 
 const char *ver                = "1.12"              ;
 
@@ -187,8 +191,8 @@ String macString =         "none";
 String uptimeString =      "none";
 String ntpTimeString =     "none";
 String freeMemoryString =  "none";
-String lightState =        "OFF";
-String lightState2 =       "OFF";
+String light1State =        "OFF";
+String light2State =        "OFF";
 String pzemVoltageString = "none";
 String pzemCurrentString = "none";
 String pzemPowerString =   "none";
@@ -206,8 +210,8 @@ int wifiReconnectTimer = 0;
 int rebootTimer = 0;
 int subscribeTimer = 0;
 
-unsigned long lightOffTimer = 0;
-unsigned long lightOffTimer2 = 0;
+unsigned long light1_offTimer = 0;
+unsigned long light1_offTimer2 = 0;
 
 bool motionDetect = false;
 bool wifiSafeMode = false;

@@ -37,13 +37,13 @@ class JsonConf
     char publish_topic                [32] = "/stateSub/"         ;
     char subscribe_topic              [32] = "/statePub/"         ;
     char command_pub_topic            [32] = "/commandPub/"       ;
-    char light_pin                    [3]  = "13"                 ;
-    char lightoff_delay               [32] = "5"                  ;
-    char lighton_lux                  [6]  = "10"                 ; // Значение в люксах, ниже которого будет включаться нагрузка
-    char light_smooth                 [2]  = "0"                  ;
+    char light1_pin                   [3]  = "13"                 ;
+    char light1_off_delay             [32] = "5"                  ;
+    char light1_on_lux                [6]  = "10"                 ; // Значение в люксах, ниже которого будет включаться нагрузка
+    char light1_smooth                [2]  = "0"                  ;
     char light2_pin                   [3]  = "12"                 ;
-    char light2off_delay              [32] = "5"                  ;
-    char light2on_lux                 [6]  = "10"                 ; // Значение в люксах, ниже которого будет включаться нагрузка
+    char light2_off_delay             [32] = "5"                  ;
+    char light2_on_lux                [6]  = "10"                 ; // Значение в люксах, ниже которого будет включаться нагрузка
     char light2_smooth                [2]  = "0"                  ;
     char reset_pin                    [3]  = "2"                  ;
     char motion_pin                   [3]  = "14"                 ;
@@ -62,20 +62,6 @@ class JsonConf
     char serial_log_level             [2]  = "3"                  ;
     char web_log_level                [2]  = "2"                  ;
 
-    char uart_delay_analog_pin0       [32] = "none"               ;
-    char uart_delay_analog_pin1       [32] = "none"               ;
-    char uart_delay_analog_pin2       [32] = "none"               ;
-    char uart_delay_analog_pin3       [32] = "none"               ;
-    char uart_delay_analog_pin4       [32] = "none"               ;
-    char uart_delay_analog_pin5       [32] = "none"               ;
-    char green_light_on               [6]  = "8:00"               ;
-    char green_light_off              [6]  = "22:00"              ;
-    char green_light_pin              [3]  = "12"                 ;
-    char green_humidity_threshold_up  [5]  = "800"                ;
-    char green_humidity_threshold_down[5]  = "250"                ;
-    char green_humidity_sensor_pin    [3]  = "20"                 ;
-    char green_pump_pin               [3]  = "33"                 ;
-
     char static_ip_enable             [2]  = "0"                  ;
     char ntp_enable                   [2]  = "1"                  ;
     char mqtt_enable                  [2]  = "0"                  ;
@@ -88,8 +74,8 @@ class JsonConf
     char pzem_enable                  [2]  = "0"                  ;
     char mhz19_enable                 [2]  = "0"                  ;
     char ds18x20_enable               [2]  = "0"                  ;
-    char light_start_time             [6]  = "00:00"              ;
-    char light_stop_time              [6]  = "24:00"              ;
+    char light1_start_time            [6]  = "00:00"              ;
+    char light1_stop_time             [6]  = "24:00"              ;
     char light2_start_time            [6]  = "00:00"              ;
     char light2_stop_time             [6]  = "24:00"              ;
 
