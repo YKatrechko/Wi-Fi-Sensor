@@ -211,11 +211,10 @@ int rebootTimer = 0;
 int subscribeTimer = 0;
 
 unsigned long light1_offTimer = 0;
-unsigned long light1_offTimer2 = 0;
+unsigned long light2_offTimer = 0;
 
 bool motionDetect = false;
 bool wifiSafeMode = false;
-
 
 char topic_buff[120];
 char value_buff[120];
@@ -253,12 +252,11 @@ char pzemReset_buff_sub[MQTTSZ];
 
 struct WORKTIME_T
 {
-  unsigned int update;
   unsigned int start_midn_minutes;
   unsigned int stop_midn_minutes;
 } worktime[2] = {
-  {1, 0, 1440},
-  {1, 0, 1440}
+  {0, 1440},
+  {0, 1440}
 };
 
 const char *AP = "AP";

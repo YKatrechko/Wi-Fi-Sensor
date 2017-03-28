@@ -26,13 +26,11 @@ const char ClassDangerP[] PROGMEM  = "danger";
 const char ClassDefaultP[] PROGMEM  = "default";
 const char ClassSuccessP[] PROGMEM  = "success";
 
-
-
 /******************************************************************************\
 
    Template
 
-  \******************************************************************************/
+\******************************************************************************/
 const char HTTP_HEAD[] PROGMEM =
   "<html lang='en'>"
   "<head>"
@@ -165,7 +163,7 @@ const char HTTP_BODY_END[] PROGMEM =
 
    For Web Page <Root>
 
-  \*********************************************************************************************/
+\*********************************************************************************************/
 const char JS_ROOT_START[] PROGMEM =
   "<SCRIPT>"
   "var xmlHttp=createXmlHttpObject();"
@@ -207,19 +205,12 @@ const char HTTP_ROOT_PANEL_DIV[] PROGMEM =
 
 const char HTTP_ROOT_PANEL_END[] PROGMEM =
   "</div>";
-/*********************************************************************************************\
-
-                                                                           For Web Page <Root>
-
-  \*********************************************************************************************/
-
-
 
 /*********************************************************************************************\
 
    For Web Page <Log Config>
 
-  \*********************************************************************************************/
+\*********************************************************************************************/
 const char HTTP_FORM_LOG[] PROGMEM =
   "<div class='col-sm-5 col-md-4 col-lg-3'>"
   "<h3>Logging Configuration</h3>"
@@ -291,7 +282,7 @@ const char HTTP_FORM_LOG[] PROGMEM =
 
    For Web Page <Console>
 
-  \*********************************************************************************************/
+\*********************************************************************************************/
 const char HTTP_CONSOLE[] PROGMEM =
   "<textarea class='form-control' rows='30' readonly id='t1' name='t1' cols='50' wrap='off'></textarea>"
   "<form class='form-horizontal' role='form'  method='post' action='cm'>"
@@ -333,12 +324,7 @@ const char JS_CONSOLE[] PROGMEM =
   "setTimeout(l,2000);"
   "}"
   "</script>";
-/*********************************************************************************************\
-
-  For Web Page <Console>
-
-  \*********************************************************************************************/
-
+/*********************************************************************************************/
 
 const char JS_PIN_CONTROL[] PROGMEM =
   "<div id='content'></div>"
@@ -395,7 +381,6 @@ const char HTTP_SENSORS[] PROGMEM  =
   "</form>"
   "<div class='clearfix visible-lg'></div>"
   "</div>";
-
 
 const char JS_WIFI_SETTINGS[] PROGMEM =
   "<script>"
@@ -486,7 +471,6 @@ const char JS_WIFI_SETTINGS[] PROGMEM =
   "});"
   "</script>";
 
-
 const char JS_NTP_SETTINGS[] PROGMEM =
   "<script>"
   "$(function(){"
@@ -510,7 +494,6 @@ const char JS_NTP_SETTINGS[] PROGMEM =
   "});"
   "});"
   "</script>";
-
 
 const char JS_MQTT_SETTINGS[] PROGMEM =
   "<script>"
