@@ -126,7 +126,7 @@ const char HTTP_FORM_INPUT_TXT_TIME[] PROGMEM =
   "</div>"
   "<script>"
   "$(function() {"
-  "$('#{id}').timepicker({ 'scrollDefault': 'now', 'timeFormat': 'H:i', 'step': 1, 'forceRoundTime': true, 'show2400': true });"
+  "$('#{id}').timepicker({ 'scrollDefault': 'now', 'timeFormat': 'H:i', 'step': 10, 'forceRoundTime': true, 'show2400': true });"
   "$('#{icon}').on('click', function(){$('#{id}').timepicker('show');});"
   "});"
   "</script>"
@@ -1290,7 +1290,7 @@ void handleEspConfig() {
   if (atoi(JConf.bh1750_enable) == 1) {
     form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
     form.replace("{id}", "light1_on_lux");
-    form.replace("{name}", "On Lux");
+    form.replace("{name}", "On Lux <");
     form.replace("{value}", String(JConf.light1_on_lux));
     form.replace("{unit}", "Lux");
   }
@@ -1319,7 +1319,7 @@ void handleEspConfig() {
 
     form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
     form.replace("{id}", "light2_on_lux");
-    form.replace("{name}", "On Lux");
+    form.replace("{name}", "On Lux <");
     form.replace("{value}", String(JConf.light2_on_lux));
     form.replace("{unit}", "Lux");
   }
