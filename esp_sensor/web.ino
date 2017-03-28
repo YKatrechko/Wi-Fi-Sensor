@@ -1896,8 +1896,14 @@ void WebServerInit() {
   WebServer.on("/bootstrap.min.css", HTTP_GET, [cache]() {
     handleFileRead("/bootstrap.min.css", cache);  //cache - Чтобы страница кешировалась
   });
+  WebServer.on("/jquery.timepicker.css", HTTP_GET, [cache]() {
+    handleFileRead("/jquery.timepicker.css", cache);  //cache - Чтобы страница кешировалась
+  });
   WebServer.on("/jquery.min.js", HTTP_GET, [cache]() {
     handleFileRead("/jquery.min.js", cache);  //cache - Чтобы страница кешировалась
+  });
+  WebServer.on("/jquery.timepicker.min.js", HTTP_GET, [cache]() {
+    handleFileRead("/jquery.timepicker.min.js", cache);  //cache - Чтобы страница кешировалась
   });
   WebServer.on("/bootstrap.min.js", HTTP_GET, [cache]() {
     handleFileRead("/bootstrap.min.js", cache);  //cache - Чтобы страница кешировалась
