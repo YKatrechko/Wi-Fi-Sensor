@@ -99,21 +99,21 @@ bool check_worktime(WORKTIME_T wtime) {
     unsigned long rawTime = timeClient.getEpochTime();
     unsigned int midnight_minutes = (rawTime % 86400L) / 60;
     snprintf_P(log, sizeof(log), PSTR("  Midnight Minutes: %d"), midnight_minutes);
-    addLog(LOG_LEVEL_DEBUG, log);
+    addLog(LOG_LEVEL_DEBUG_MORE, log);
 
     snprintf_P(log, sizeof(log), PSTR("  START Minutes: %d"), wtime.start_midn_minutes);
-    addLog(LOG_LEVEL_DEBUG, log);
+    addLog(LOG_LEVEL_DEBUG_MORE, log);
     snprintf_P(log, sizeof(log), PSTR("  STOP Minutes: %d"), wtime.stop_midn_minutes);
-    addLog(LOG_LEVEL_DEBUG, log);
+    addLog(LOG_LEVEL_DEBUG_MORE, log);
 
     if ((wtime.start_midn_minutes < wtime.stop_midn_minutes && (midnight_minutes < wtime.start_midn_minutes || midnight_minutes >= wtime.stop_midn_minutes))     // case A interv 1 3
         || (wtime.start_midn_minutes > wtime.stop_midn_minutes && midnight_minutes < wtime.start_midn_minutes && midnight_minutes >= wtime.stop_midn_minutes)) {  // case B interv 2
-      addLog_P(LOG_LEVEL_DEBUG, "  time to light off");
+      addLog_P(LOG_LEVEL_DEBUG_MORE, "  time to light off");
       return false;
     }
   }
 #endif
-  addLog_P(LOG_LEVEL_DEBUG, "  time to light on");
+  addLog_P(LOG_LEVEL_DEBUG_MORE, "  time to light on");
   return true;
 }
 
@@ -123,19 +123,20 @@ void Light1Control() {
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: LightControl Start");
 
   if (light1State == ON) {
-    digitalWrite(atoi(JConf.light1_pin), HIGH);
+    worktime[0].state = HIGH;
   } else if (light1State == OFF) {
-    digitalWrite(atoi(JConf.light1_pin), LOW);
+    worktime[0].state = LOW;
   } else if (light1State == AUTO) {
-    addLog_P(LOG_LEVEL_DEBUG, "Func: Light1");
+    addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: Light1");
     if (check_worktime(worktime[0]) && (atoi(JConf.bh1750_enable) == 0 || (atoi(JConf.bh1750_enable) == 1 && luxString.toInt() < atoi(JConf.light1_on_lux)))) {
-      digitalWrite(atoi(JConf.light1_pin), HIGH);
-      addLog_P(LOG_LEVEL_DEBUG, "  > light1 on");
+      worktime[0].state = HIGH;
+      addLog_P(LOG_LEVEL_DEBUG_MORE, "  > light1 on");
     } else {
-      addLog_P(LOG_LEVEL_DEBUG, "  > light1 off");
-      digitalWrite(atoi(JConf.light1_pin), LOW);
+      addLog_P(LOG_LEVEL_DEBUG_MORE, "  > light1 off");
+      worktime[0].state = LOW;
     }
   }
+  digitalWrite(atoi(JConf.light1_pin), worktime[0].state);
 
   unsigned long load_time = millis() - start_time;
   snprintf_P(log, sizeof(log), PSTR("Func: LightControl load time: %d"), load_time);
@@ -149,19 +150,20 @@ void Light2Control() {
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: LightControl2 Start");
 
   if (light2State == ON) {
-    digitalWrite(atoi(JConf.light2_pin), HIGH);
+    worktime[1].state = HIGH;
   } else if (light2State == OFF) {
-    digitalWrite(atoi(JConf.light2_pin), LOW);
+    worktime[1].state = LOW;
   } else if (light2State == AUTO) {
-    addLog_P(LOG_LEVEL_DEBUG, "Func: Light2");
+    addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: Light2");
     if (check_worktime(worktime[1]) && (atoi(JConf.bh1750_enable) == 0 || (atoi(JConf.bh1750_enable) == 1 && luxString.toInt() < atoi(JConf.light1_on_lux)))) {
-      addLog_P(LOG_LEVEL_DEBUG, "  > light2 on");
-      digitalWrite(atoi(JConf.light2_pin), HIGH);
+      addLog_P(LOG_LEVEL_DEBUG_MORE, "  > light2 on");
+      worktime[1].state = HIGH;
     } else {
-      addLog_P(LOG_LEVEL_DEBUG, "  > light2 off");
-      digitalWrite(atoi(JConf.light2_pin), LOW);
+      addLog_P(LOG_LEVEL_DEBUG_MORE, "  > light2 off");
+      worktime[1].state = LOW;
     }
   }
+  digitalWrite(atoi(JConf.light2_pin), worktime[1].state);
 
   unsigned long load_time = millis() - start_time;
   snprintf_P(log, sizeof(log), PSTR("Func: LightControl2 load time: %d"), load_time);

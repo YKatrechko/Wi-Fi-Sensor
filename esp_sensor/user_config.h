@@ -252,11 +252,12 @@ char pzemReset_buff_sub[MQTTSZ];
 
 struct WORKTIME_T
 {
+  unsigned int state;
   unsigned int start_midn_minutes;
   unsigned int stop_midn_minutes;
 } worktime[2] = {
-  {0, 1440},
-  {0, 1440}
+  {1, 0, 1440},
+  {1, 0, 1440}
 };
 
 const char *AP = "AP";

@@ -1289,23 +1289,10 @@ void handleEspConfig() {
 
   if (atoi(JConf.bh1750_enable) == 1) {
     form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
-    form.replace("{id}", "light1_off_delay");
-    form.replace("{name}", "Off Delay");
-    form.replace("{value}", String(JConf.light1_off_delay));
-    form.replace("{unit}", "min");
-
-    form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
     form.replace("{id}", "light1_on_lux");
     form.replace("{name}", "On Lux");
     form.replace("{value}", String(JConf.light1_on_lux));
     form.replace("{unit}", "Lux");
-  }
-
-  form += FPSTR(HTTP_FORM_CHECKBOX);
-  form.replace("{id}", "light1_smooth");
-  form.replace("{name}", "Smooth Enable");
-  if (atoi(JConf.light1_smooth) == 1) {
-    form.replace("id='light1_smooth'", "checked='true' id='light1_smooth'");
   }
 
   form += String(F("<hr>"));
@@ -1329,11 +1316,6 @@ void handleEspConfig() {
   form.replace("{icon}", "light2_stop_time_icon");
 
   if (atoi(JConf.bh1750_enable) == 1) {
-    form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
-    form.replace("{id}", "light2_off_delay");
-    form.replace("{name}", "Off Delay");
-    form.replace("{value}", String(JConf.light2_off_delay));
-    form.replace("{unit}", "min");
 
     form += FPSTR(HTTP_FORM_INPUT_TXT_UNIT);
     form.replace("{id}", "light2_on_lux");
@@ -1342,12 +1324,6 @@ void handleEspConfig() {
     form.replace("{unit}", "Lux");
   }
 
-  form += FPSTR(HTTP_FORM_CHECKBOX);
-  form.replace("{id}", "light2_smooth");
-  form.replace("{name}", "Smooth Enable");
-  if (atoi(JConf.light2_smooth) == 1) {
-    form.replace("id='light2_smooth'", "checked='true' id='light2_smooth'");
-  }
   form += String(F("<hr>"));
 
   if (atoi(JConf.motion_sensor_enable) == 1) {
@@ -1575,28 +1551,14 @@ void handleSave() {
       break;
     case 5:  //ESP Config save
       strlcpy(JConf.light1_pin, (!strlen(WebServer.arg("light1_pin").c_str())) ? JConf.light1_pin : WebServer.arg("light1_pin").c_str(), sizeof(JConf.light1_pin));
-      strlcpy(JConf.light1_off_delay, (!strlen(WebServer.arg("light1_off_delay").c_str())) ? JConf.light1_off_delay : WebServer.arg("light1_off_delay").c_str(), sizeof(JConf.light1_off_delay));
       strlcpy(JConf.light1_on_lux, (!strlen(WebServer.arg("light1_on_lux").c_str())) ? JConf.light1_on_lux : WebServer.arg("light1_on_lux").c_str(), sizeof(JConf.light1_on_lux));
       strlcpy(JConf.light1_start_time, (!strlen(WebServer.arg("light1_start_time").c_str())) ? JConf.light1_start_time : WebServer.arg("light1_start_time").c_str(), sizeof(JConf.light1_start_time));
       strlcpy(JConf.light1_stop_time, (!strlen(WebServer.arg("light1_stop_time").c_str())) ? JConf.light1_stop_time : WebServer.arg("light1_stop_time").c_str(), sizeof(JConf.light1_stop_time));
 
-      if (strstr(WebServer.arg("light1_smooth").c_str(), "1")) {
-        strlcpy(JConf.light1_smooth, "1", sizeof(JConf.light1_smooth));
-      } else {
-        strlcpy(JConf.light1_smooth, "0", sizeof(JConf.light1_smooth));
-      }
-
       strlcpy(JConf.light2_pin, (!strlen(WebServer.arg("light2_pin").c_str())) ? JConf.light2_pin : WebServer.arg("light2_pin").c_str(), sizeof(JConf.light2_pin));
-      strlcpy(JConf.light2_off_delay, (!strlen(WebServer.arg("light2_off_delay").c_str())) ? JConf.light2_off_delay : WebServer.arg("light2_off_delay").c_str(), sizeof(JConf.light2_off_delay));
       strlcpy(JConf.light2_on_lux, (!strlen(WebServer.arg("light2_on_lux").c_str())) ? JConf.light2_on_lux : WebServer.arg("light2_on_lux").c_str(), sizeof(JConf.light2_on_lux));
       strlcpy(JConf.light2_start_time, (!strlen(WebServer.arg("light2_start_time").c_str())) ? JConf.light2_start_time : WebServer.arg("light2_start_time").c_str(), sizeof(JConf.light2_start_time));
       strlcpy(JConf.light2_stop_time, (!strlen(WebServer.arg("light2_stop_time").c_str())) ? JConf.light2_stop_time : WebServer.arg("light2_stop_time").c_str(), sizeof(JConf.light2_stop_time));
-
-      if (strstr(WebServer.arg("light2_smooth").c_str(), "1")) {
-        strlcpy(JConf.light2_smooth, "1", sizeof(JConf.light2_smooth));
-      } else {
-        strlcpy(JConf.light2_smooth, "0", sizeof(JConf.light2_smooth));
-      }
 
       strlcpy(JConf.motion_pin, (!strlen(WebServer.arg("motion_pin").c_str())) ? JConf.motion_pin : WebServer.arg("motion_pin").c_str(), sizeof(JConf.motion_pin));
       strlcpy(JConf.dht_pin, (!strlen(WebServer.arg("dht_pin").c_str())) ? JConf.dht_pin : WebServer.arg("dht_pin").c_str(), sizeof(JConf.dht_pin));
@@ -1700,8 +1662,8 @@ void WebPinControlStatus(void) {
   String ClassDefault;    ClassDefault += FPSTR(ClassDefaultP);
   String ClassSuccess;    ClassSuccess += FPSTR(ClassSuccessP);
 
-  light1pinState = (light1State == OFF) ? false : true;
-  light2pinState = (light2State == OFF) ? false : true;
+  light1pinState = (worktime[0].state == LOW) ? false : true;
+  light2pinState = (worktime[1].state == LOW) ? false : true;
 
   data += FPSTR(div1P);
   data += String(F("<td class='active'><h4>Begin</h4></td><td class='active'><h4>End</h4></td>"));

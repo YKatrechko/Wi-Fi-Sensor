@@ -2,7 +2,10 @@
 
 
 bool JsonConf::saveConfig() {
-  StaticJsonBuffer<1024> jsonBuffer;
+//  StaticJsonBuffer<2048> jsonBuffer;
+
+const size_t bufferSize = JSON_OBJECT_SIZE(58) + 1190;
+DynamicJsonBuffer jsonBuffer(bufferSize);
 #ifdef DEBUG_JSON_CONFIG
   Serial.print(F("saveConfig()"));  Serial.println();
 #endif
@@ -22,6 +25,10 @@ bool JsonConf::saveConfig() {
   json["static_subnet"]                 = static_subnet                ;
   json["ntp_server"]                    = ntp_server                   ;
   json["my_time_zone"]                  = my_time_zone                 ;
+  json["light1_start_time"]             = light1_start_time            ;
+  json["light1_stop_time"]              = light1_stop_time             ;
+  json["light2_start_time"]             = light2_start_time            ;
+  json["light2_stop_time"]              = light2_stop_time             ;
   json["mqtt_server"]                   = mqtt_server                  ;
   json["mqtt_port"]                     = mqtt_port                    ;
   json["mqtt_user"]                     = mqtt_user                    ;
@@ -31,13 +38,9 @@ bool JsonConf::saveConfig() {
   json["subscribe_topic"]               = subscribe_topic              ;
   json["command_pub_topic"]             = command_pub_topic            ;
   json["light1_pin"]                    = light1_pin                   ;
-  json["light1_off_delay"]              = light1_off_delay             ;
   json["light1_on_lux"]                 = light1_on_lux                ;
-  json["light1_smooth"]                 = light1_smooth                ;
   json["light2_pin"]                    = light2_pin                   ;
-  json["light2_off_delay"]              = light2_off_delay             ;
   json["light2_on_lux"]                 = light2_on_lux                ;
-  json["light2_smooth"]                 = light2_smooth                ;
   json["reset_pin"]                     = reset_pin                    ;
   json["motion_pin"]                    = motion_pin                   ;
   json["dht_pin"]                       = dht_pin                      ;
@@ -46,7 +49,6 @@ bool JsonConf::saveConfig() {
   json["subscribe_delay"]               = subscribe_delay              ;
   json["motion_read_delay"]             = motion_read_delay            ;
   json["reboot_delay"]                  = reboot_delay                 ;
-
   json["sys_log_host"]                  = sys_log_host                 ;
   json["sys_log_port"]                  = sys_log_port                 ;
   json["sys_log_level"]                 = sys_log_level                ;
@@ -64,11 +66,6 @@ bool JsonConf::saveConfig() {
   json["pzem_enable"]                   = pzem_enable                  ;
   json["mhz19_enable"]                  = mhz19_enable                 ;
   json["ds18x20_enable"]                = ds18x20_enable               ;
-  
-  json["light1_start_time"]             = light1_start_time            ;
-  json["light1_stop_time"]              = light1_stop_time             ;
-  json["light2_start_time"]             = light2_start_time            ;
-  json["light2_stop_time"]              = light2_stop_time             ;
 
 
   File configFile = SPIFFS.open(ConfigFileName, "w");
@@ -85,7 +82,7 @@ bool JsonConf::saveConfig() {
 #endif
   json.printTo(configFile);
   configFile.close();
-  Serial.println(F("Finished to open config file for writing"));
+  Serial.println(F("Finished saving config file"));
 
   return true;
 }
@@ -114,7 +111,6 @@ bool JsonConf::loadConfig() {
 #endif
     return false;
   }
-
   // Allocate a buffer to store contents of the file.
   std::unique_ptr<char[]> buf(new char[size]);
 
@@ -123,8 +119,10 @@ bool JsonConf::loadConfig() {
   // use configFile.readString instead.
   configFile.readBytes(buf.get(), size);
 
-  StaticJsonBuffer<1024> jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(buf.get());
+//  StaticJsonBuffer<2048> jsonBuffer;
+const size_t bufferSize = JSON_OBJECT_SIZE(58) + 1190;
+DynamicJsonBuffer jsonBuffer(bufferSize);
+JsonObject& json = jsonBuffer.parseObject(buf.get());
 
   if (!json.success()) {
 #ifdef DEBUG_JSON_CONFIG
@@ -134,7 +132,6 @@ bool JsonConf::loadConfig() {
 #endif
     return false;
   }
-
 
   if (json.containsKey("module_id"                     )) {  const char* module_id_char                     = json["module_id"                    ];    sprintf_P(module_id,                     ("%s"), module_id_char                    ); }
   if (json.containsKey("wifi_mode"                     )) {  const char* wifi_mode_char                     = json["wifi_mode"                    ];    sprintf_P(wifi_mode,                     ("%s"), wifi_mode_char                    ); }
@@ -158,13 +155,9 @@ bool JsonConf::loadConfig() {
   if (json.containsKey("subscribe_topic"               )) {  const char* subscribe_topic_char               = json["subscribe_topic"              ];    sprintf_P(subscribe_topic,               ("%s"), subscribe_topic_char              ); }
   if (json.containsKey("command_pub_topic"             )) {  const char* command_pub_topic_char             = json["command_pub_topic"            ];    sprintf_P(command_pub_topic,             ("%s"), command_pub_topic_char            ); }
   if (json.containsKey("light1_pin"                    )) {  const char* light1_pin_char                    = json["light1_pin"                   ];    sprintf_P(light1_pin,                    ("%s"), light1_pin_char                   ); }
-  if (json.containsKey("light1_off_delay"              )) {  const char* light1_off_delay_char              = json["light1_off_delay"             ];    sprintf_P(light1_off_delay,              ("%s"), light1_off_delay_char             ); }
   if (json.containsKey("light1_on_lux"                 )) {  const char* light1_on_lux_char                 = json["light1_on_lux"                ];    sprintf_P(light1_on_lux,                 ("%s"), light1_on_lux_char                ); }
-  if (json.containsKey("light1_smooth"                 )) {  const char* light1_smooth_char                 = json["light1_smooth"                ];    sprintf_P(light1_smooth,                 ("%s"), light1_smooth_char                ); }
   if (json.containsKey("light2_pin"                    )) {  const char* light2_pin_char                    = json["light2_pin"                   ];    sprintf_P(light2_pin,                    ("%s"), light2_pin_char                   ); }
-  if (json.containsKey("light2_off_delay"              )) {  const char* light2_off_delay_char              = json["light2_off_delay"             ];    sprintf_P(light2_off_delay,              ("%s"), light2_off_delay_char             ); }
   if (json.containsKey("light2_on_lux"                 )) {  const char* light2_on_lux_char                 = json["light2_on_lux"                ];    sprintf_P(light2_on_lux,                 ("%s"), light2_on_lux_char                ); }
-  if (json.containsKey("light2_smooth"                 )) {  const char* light2_smooth_char                 = json["light2_smooth"                ];    sprintf_P(light2_smooth,                 ("%s"), light2_smooth_char                ); }
   if (json.containsKey("reset_pin"                     )) {  const char* reset_pin_char                     = json["reset_pin"                    ];    sprintf_P(reset_pin,                     ("%s"), reset_pin_char                    ); }
   if (json.containsKey("motion_pin"                    )) {  const char* motion_pin_char                    = json["motion_pin"                   ];    sprintf_P(motion_pin,                    ("%s"), motion_pin_char                   ); }
   if (json.containsKey("dht_pin"                       )) {  const char* dht_pin_char                       = json["dht_pin"                      ];    sprintf_P(dht_pin,                       ("%s"), dht_pin_char                      ); }
@@ -201,14 +194,11 @@ bool JsonConf::loadConfig() {
   return true;
 }
 
-
 void JsonConf::deleteConfig() {
   SPIFFS.remove(ConfigFileName);
 }
 
-
 bool JsonConf::printConfig() {
-
   Serial.print(F("module_id                    : "));   Serial.println(module_id                    );
   Serial.print(F("wifi_mode                    : "));   Serial.println(wifi_mode                    );
   Serial.print(F("wifi_phy_mode                : "));   Serial.println(wifi_phy_mode                );
@@ -231,13 +221,9 @@ bool JsonConf::printConfig() {
   Serial.print(F("subscribe_topic              : "));   Serial.println(subscribe_topic              );
   Serial.print(F("command_pub_topic            : "));   Serial.println(command_pub_topic            );
   Serial.print(F("light1_pin                   : "));   Serial.println(light1_pin                   );
-  Serial.print(F("light1_off_delay             : "));   Serial.println(light1_off_delay             );
   Serial.print(F("light1_on_lux                : "));   Serial.println(light1_on_lux                );
-  Serial.print(F("light1_smooth                : "));   Serial.println(light1_smooth                );
   Serial.print(F("light2_pin                   : "));   Serial.println(light2_pin                   );
-  Serial.print(F("light2_off_delay             : "));   Serial.println(light2_off_delay             );
   Serial.print(F("light2_on_lux                : "));   Serial.println(light2_on_lux                );
-  Serial.print(F("light2_smooth                : "));   Serial.println(light2_smooth                );
   Serial.print(F("reset_pin                    : "));   Serial.println(reset_pin                    );
   Serial.print(F("motion_pin                   : "));   Serial.println(motion_pin                   );
   Serial.print(F("dht_pin                      : "));   Serial.println(dht_pin                      );
@@ -246,7 +232,6 @@ bool JsonConf::printConfig() {
   Serial.print(F("subscribe_delay              : "));   Serial.println(subscribe_delay              );
   Serial.print(F("motion_read_delay            : "));   Serial.println(motion_read_delay            );
   Serial.print(F("reboot_delay                 : "));   Serial.println(reboot_delay                 );
-
   Serial.print(F("sys_log_host                 : "));   Serial.println(sys_log_host                 );
   Serial.print(F("sys_log_port                 : "));   Serial.println(sys_log_port                 );
   Serial.print(F("sys_log_level                : "));   Serial.println(sys_log_level                );
