@@ -23,8 +23,6 @@ int WIFI_getRSSIasQuality(int RSSI) {
   return quality;
 }
 
-
-
 void scanWiFi(void) {
   char log[LOGSZ];
   unsigned long start_time = millis();
@@ -63,8 +61,6 @@ void scanWiFi(void) {
   snprintf_P(log, sizeof(log), PSTR("Func: scanWiFi load time: %d"), load_time);
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
-
-
 
 void wifiAPSettings(){
   char log[LOGSZ];
@@ -115,8 +111,6 @@ void wifiAPSettings(){
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
 
-
-
 bool wifiTryConnect(){
   char log[LOGSZ];
   unsigned long start_time = millis();
@@ -148,8 +142,6 @@ bool wifiTryConnect(){
   return true;
 }
 
-
-
 void wifiIP() {
   //DHCP or Static IP ?
   if (atoi(JConf.static_ip_enable) == 1) {
@@ -171,8 +163,6 @@ void wifiIP() {
   ipString = GetIpString(espIP);
 }
 
-
-
 void wifiAP() {
   char log[LOGSZ];
   unsigned long start_time = millis();
@@ -186,8 +176,6 @@ void wifiAP() {
   snprintf_P(log, sizeof(log), PSTR("Func: wifiAP load time: %d"), load_time);
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
-
-
 
 bool wifiSTA() {
   char log[LOGSZ];
@@ -213,8 +201,6 @@ bool wifiSTA() {
   return true;
 }
 
-
-
 bool wifiAP_STA() {
   char log[LOGSZ];
   unsigned long start_time = millis();
@@ -236,8 +222,6 @@ bool wifiAP_STA() {
   return true;
 }
 
-
-
 void wifiReconnect() {
   char log[LOGSZ];
   unsigned long start_time = millis();
@@ -252,8 +236,6 @@ void wifiReconnect() {
   snprintf_P(log, sizeof(log), PSTR("Func: wifiReconnect load time: %d"), load_time);
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
-
-
 
 bool WiFiSetup() {
   char log[LOGSZ];
@@ -279,8 +261,6 @@ bool WiFiSetup() {
   return true;
 }
 
-
-
 void  WiFiSafeSetup() {
   char log[LOGSZ];
   unsigned long start_time = millis();
@@ -299,8 +279,6 @@ void  WiFiSafeSetup() {
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
 
-
-
 void wifiSafeModeReconnect() {
   char log[LOGSZ];
   unsigned long start_time = millis();
@@ -318,7 +296,9 @@ void wifiSafeModeReconnect() {
  *                                                                                      Wi-fi*
 \*********************************************************************************************/
 
-
+bool IsDigit( char c ) {
+   return ( '0' <= c && c <= '9' );
+}
 
 void GetFreeMemory () {
 

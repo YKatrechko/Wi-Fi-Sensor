@@ -9,7 +9,7 @@ JsonConf JConf;
 #define BME280_ON
 #define SHT21_ON
 #define BH1750_ON
-#define PZEM_ON
+//#define PZEM_ON
 
 //------------------DS18X20 Sensors---------------------------------------------
 #define DS18X20_ON
@@ -94,14 +94,17 @@ struct TIME_T {
 
 WiFiClient espClient;
 
-
 Adafruit_MQTT_Client mqtt = Adafruit_MQTT_Client(&espClient, JConf.mqtt_server, atoi(JConf.mqtt_port), JConf.mqtt_user, JConf.mqtt_pwd);
 
 Adafruit_MQTT_Publish pubTopicLight1State = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
 Adafruit_MQTT_Publish pubTopicLight2State = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
+
+Adafruit_MQTT_Publish pubTopicLight1StartTime = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
+Adafruit_MQTT_Publish pubTopicLight1StopTime = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
+Adafruit_MQTT_Publish pubTopicLight2StartTime = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
+Adafruit_MQTT_Publish pubTopicLight2StopTime = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
+
 Adafruit_MQTT_Publish pubTopicMotionSensor = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
-Adafruit_MQTT_Publish pubTopicMotionSensorTimer = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
-Adafruit_MQTT_Publish pubTopicMotionSensorTimer2 = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
 
 Adafruit_MQTT_Publish pubTopicLux = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
 Adafruit_MQTT_Publish pubTopicTemperature = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
@@ -125,11 +128,14 @@ Adafruit_MQTT_Publish pubTopicVersion = Adafruit_MQTT_Publish(&mqtt, JConf.publi
 Adafruit_MQTT_Publish pubTopicIp = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
 Adafruit_MQTT_Publish pubTopicMac = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
 
-Adafruit_MQTT_Subscribe subTopicMotionSensorTimer = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
-Adafruit_MQTT_Subscribe subTopicMotionSensorTimer2 = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
 Adafruit_MQTT_Subscribe subTopicLight1State = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
 Adafruit_MQTT_Subscribe subTopicLight2State = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
+Adafruit_MQTT_Subscribe subTopicLight1StartTime = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
+Adafruit_MQTT_Subscribe subTopicLight1StopTime = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
+Adafruit_MQTT_Subscribe subTopicLight2StartTime = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
+Adafruit_MQTT_Subscribe subTopicLight2StopTime = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
 Adafruit_MQTT_Subscribe subTopicUptime = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
+Adafruit_MQTT_Subscribe subTopicSaveConfig = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
 
 
 #ifdef DS18X20_ON
@@ -159,15 +165,17 @@ const char OFFP[] PROGMEM  = "OFF";
 const char *ver                = "1.12"              ;
 
 const char *lux                = "Lux"               ;
-const char *Light1State          = "Light1State"         ;
-const char *Light2State         = "Light2State"        ;
+const char *Light1State        = "Light1State"       ;
+const char *Light2State        = "Light2State"       ;
+const char *Light1StartTime    = "Light1StartTime"   ;
+const char *Light1StopTime     = "Light1StopTime"    ;
+const char *Light2StartTime    = "Light2StartTime"   ;
+const char *Light2StopTime     = "Light2StopTime"    ;
 const char *temperature        = "Temp"              ;
 const char *humidity           = "Humidity"          ;
 const char *pressure           = "Pressure"          ;
 const char *altitude           = "Altitude"          ;
 const char *motionSensor       = "MotionSensor"      ;
-const char *motionSensorTimer  = "MotionSensorTimer" ;
-const char *motionSensorTimer2 = "MotionSensorTimer2";
 const char *version            = "Version"           ;
 const char *freeMemory         = "FreeMemory"        ;
 const char *ip                 = "IP"                ;
@@ -179,6 +187,7 @@ const char *pzemPower          = "pzemPower"         ;
 const char *pzemEnergy         = "pzemEnergy"        ;
 const char *pzemReset          = "pzemReset"         ;
 const char *mhz19ppm           = "mhz19ppm"          ;
+const char *SaveConfig         = "SaveConfig"        ;
 
 const char sec[] PROGMEM = "sec";
 
@@ -221,9 +230,11 @@ char value_buff[120];
 
 char Light1State_buff[MQTTSZ];
 char Light2State_buff[MQTTSZ];
+char Light1StartTime_buff[MQTTSZ];
+char Light1StopTime_buff[MQTTSZ];
+char Light2StartTime_buff[MQTTSZ];
+char Light2StopTime_buff[MQTTSZ];
 char motionSensor_buff[MQTTSZ];
-char motionSensorTimer_buff[MQTTSZ];
-char motionSensorTimer2_buff[MQTTSZ];
 char lux_buff[MQTTSZ];
 char temperature_buff[MQTTSZ];
 char humidity_buff[MQTTSZ];
@@ -241,11 +252,14 @@ char version_buff[MQTTSZ];
 char ip_buff[MQTTSZ];
 char mac_buff[MQTTSZ];
 
-char motionSensorTimer_buff_sub[MQTTSZ];
-char motionSensorTimer2_buff_sub[MQTTSZ];
 char Light1State_buff_sub[MQTTSZ];
 char Light2State_buff_sub[MQTTSZ];
+char Light1StartTime_buff_sub[MQTTSZ];
+char Light1StopTime_buff_sub[MQTTSZ];
+char Light2StartTime_buff_sub[MQTTSZ];
+char Light2StopTime_buff_sub[MQTTSZ];
 char uptime_buff_sub[MQTTSZ];
+char saveConfig_buff_sub[MQTTSZ];
 #ifdef PZEM_ON
 char pzemReset_buff_sub[MQTTSZ];
 #endif //PZEM_ON
@@ -256,8 +270,8 @@ struct WORKTIME_T
   unsigned int start_midn_minutes;
   unsigned int stop_midn_minutes;
 } worktime[2] = {
-  {1, 0, 1440},
-  {1, 0, 1440}
+  {1, 0, 24 * 60},
+  {1, 0, 24 * 60}
 };
 
 const char *AP = "AP";
