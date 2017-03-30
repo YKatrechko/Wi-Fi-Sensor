@@ -29,14 +29,13 @@ class JsonConf
     char static_subnet                [16] = "255.255.255.0"      ;
     char ntp_server                   [32] = "europe.pool.ntp.org";
     char my_time_zone                 [4]  = "+3"                 ;
-    char mqtt_server                  [16] = "192.168.2.205"      ;
+    char mqtt_server                  [32] = "192.168.2.205"      ;
     char mqtt_port                    [6]  = "1883"               ;
     char mqtt_user                    [32] = "none"               ;
     char mqtt_pwd                     [32] = "none"               ;
     char mqtt_name                    [32] = "_BedM"              ;
     char publish_topic                [32] = "/stateSub/"         ;
     char subscribe_topic              [32] = "/statePub/"         ;
-    char command_pub_topic            [32] = "/commandPub/"       ;
     char light1_pin                   [3]  = "13"                 ;
     char light1_on_lux                [6]  = "10"                 ; // Значение в люксах, ниже которого будет включаться нагрузка
     char light2_pin                   [3]  = "12"                 ;

@@ -97,8 +97,8 @@ WiFiClient espClient;
 
 Adafruit_MQTT_Client mqtt = Adafruit_MQTT_Client(&espClient, JConf.mqtt_server, atoi(JConf.mqtt_port), JConf.mqtt_user, JConf.mqtt_pwd);
 
-Adafruit_MQTT_Publish pubTopicLightType = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
-Adafruit_MQTT_Publish pubTopicLightType2 = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
+Adafruit_MQTT_Publish pubTopicLight1State = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
+Adafruit_MQTT_Publish pubTopicLight2State = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
 Adafruit_MQTT_Publish pubTopicMotionSensor = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
 Adafruit_MQTT_Publish pubTopicMotionSensorTimer = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
 Adafruit_MQTT_Publish pubTopicMotionSensorTimer2 = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
@@ -114,7 +114,7 @@ Adafruit_MQTT_Publish pubTopicPzemCurrent = Adafruit_MQTT_Publish(&mqtt, JConf.p
 Adafruit_MQTT_Publish pubTopicPzemPower = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
 Adafruit_MQTT_Publish pubTopicPzemEnergy = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
 
-Adafruit_MQTT_Subscribe subTopicPzemReset = Adafruit_MQTT_Subscribe(&mqtt, JConf.command_pub_topic);
+Adafruit_MQTT_Subscribe subTopicPzemReset = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
 #endif //PZEM_ON
 
 Adafruit_MQTT_Publish pubTopicMhz19ppm = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
@@ -125,11 +125,11 @@ Adafruit_MQTT_Publish pubTopicVersion = Adafruit_MQTT_Publish(&mqtt, JConf.publi
 Adafruit_MQTT_Publish pubTopicIp = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
 Adafruit_MQTT_Publish pubTopicMac = Adafruit_MQTT_Publish(&mqtt, JConf.publish_topic);
 
-Adafruit_MQTT_Subscribe subTopicMotionSensorTimer = Adafruit_MQTT_Subscribe(&mqtt, JConf.command_pub_topic);
-Adafruit_MQTT_Subscribe subTopicMotionSensorTimer2 = Adafruit_MQTT_Subscribe(&mqtt, JConf.command_pub_topic);
-Adafruit_MQTT_Subscribe subTopicLightType = Adafruit_MQTT_Subscribe(&mqtt, JConf.command_pub_topic);
-Adafruit_MQTT_Subscribe subTopicLightType2 = Adafruit_MQTT_Subscribe(&mqtt, JConf.command_pub_topic);
-Adafruit_MQTT_Subscribe subTopicUptime = Adafruit_MQTT_Subscribe(&mqtt, JConf.command_pub_topic);
+Adafruit_MQTT_Subscribe subTopicMotionSensorTimer = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
+Adafruit_MQTT_Subscribe subTopicMotionSensorTimer2 = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
+Adafruit_MQTT_Subscribe subTopicLight1State = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
+Adafruit_MQTT_Subscribe subTopicLight2State = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
+Adafruit_MQTT_Subscribe subTopicUptime = Adafruit_MQTT_Subscribe(&mqtt, JConf.subscribe_topic);
 
 
 #ifdef DS18X20_ON
@@ -159,8 +159,8 @@ const char OFFP[] PROGMEM  = "OFF";
 const char *ver                = "1.12"              ;
 
 const char *lux                = "Lux"               ;
-const char *lightType          = "LightType"         ;
-const char *lightType2         = "LightType2"        ;
+const char *Light1State          = "Light1State"         ;
+const char *Light2State         = "Light2State"        ;
 const char *temperature        = "Temp"              ;
 const char *humidity           = "Humidity"          ;
 const char *pressure           = "Pressure"          ;
@@ -219,8 +219,8 @@ bool wifiSafeMode = false;
 char topic_buff[120];
 char value_buff[120];
 
-char lightType_buff[MQTTSZ];
-char lightType2_buff[MQTTSZ];
+char Light1State_buff[MQTTSZ];
+char Light2State_buff[MQTTSZ];
 char motionSensor_buff[MQTTSZ];
 char motionSensorTimer_buff[MQTTSZ];
 char motionSensorTimer2_buff[MQTTSZ];
@@ -243,8 +243,8 @@ char mac_buff[MQTTSZ];
 
 char motionSensorTimer_buff_sub[MQTTSZ];
 char motionSensorTimer2_buff_sub[MQTTSZ];
-char lightType_buff_sub[MQTTSZ];
-char lightType2_buff_sub[MQTTSZ];
+char Light1State_buff_sub[MQTTSZ];
+char Light2State_buff_sub[MQTTSZ];
 char uptime_buff_sub[MQTTSZ];
 #ifdef PZEM_ON
 char pzemReset_buff_sub[MQTTSZ];

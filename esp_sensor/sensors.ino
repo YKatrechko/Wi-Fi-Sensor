@@ -60,8 +60,7 @@ void encoderReadPinB() {
 #endif //ENCODER_ON
 
 #ifdef BH1750_ON
-void GetLightSensorData()
-{
+void GetLightSensorData() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: GetLightSensorData Start");
@@ -77,11 +76,8 @@ void GetLightSensorData()
 }
 #endif
 
-
-
 #ifdef BME280_ON
-void GetBmeSensorData()
-{
+void GetBmeSensorData() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: GetBmeSensorData Start");
@@ -104,11 +100,8 @@ void GetBmeSensorData()
 }
 #endif
 
-
-
 #ifdef SHT21_ON
 void GetSHT21SensorData() {
-
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: GetSHT21SensorData Start");
@@ -129,11 +122,8 @@ void GetSHT21SensorData() {
 }
 #endif
 
-
-
 #ifdef DHT_ON
-void GetDhtSensorData()
-{
+void GetDhtSensorData() {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: GetDhtSensorData Start");
@@ -161,16 +151,13 @@ void GetDhtSensorData()
 }
 #endif
 
-
 #ifdef DS18X20_ON
 void SearchDS18x20Sensors() {
-
   if (searchDsSensorDone) {
     return;
   }
 
   char log[LOGSZ];
-
   if (!ds.search(dsData[currentDsSensor].address)) {
     searchDsSensorDone = true;
     currentDsSensor = 0;
@@ -187,14 +174,11 @@ void SearchDS18x20Sensors() {
   }
 
   String addr = "";
-  for (size_t i = 0; i < 8; i++)
-  {
+  for (size_t i = 0; i < 8; i++) {
     addr += String(dsData[currentDsSensor].address[i], HEX);
   }
   dsData[currentDsSensor].addressString = addr;
-
-  switch (dsData[currentDsSensor].address[0])
-  {
+  switch (dsData[currentDsSensor].address[0]) {
     case 0x10:
       dsData[currentDsSensor].type = DS18S20;
       break;
@@ -215,10 +199,7 @@ void SearchDS18x20Sensors() {
   SearchDS18x20Sensors();
 }
 
-
-
 void GetDS18x20SensorData() {
-
   if (findDsSensors == 0) {
     addLog_P(LOG_LEVEL_ERROR, "DS Sensors Not Found!");
     searchDsSensorDone = false;
@@ -244,8 +225,7 @@ void GetDS18x20SensorData() {
   ds.select(dsData[currentDsSensor].address);
   ds.write(0xBE);         // Read Scratchpad
 
-  for (i = 0; i < 9; i++)
-  { // we need 9 bytes
+  for (i = 0; i < 9; i++) { // we need 9 bytes
     data[i] = ds.read();
   }
 
@@ -282,8 +262,6 @@ void GetDS18x20SensorData() {
   nextDsSensor();
 }
 
-
-
 void nextDsSensor() {
   if (findDsSensors == currentDsSensor + 1) {
     currentDsSensor = 0;
@@ -292,10 +270,7 @@ void nextDsSensor() {
   }
 }
 
-
-
 void dsDataPrint() {
-
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: dsDataPrint Start");
@@ -326,11 +301,8 @@ void dsDataPrint() {
 }
 #endif //DS18X20_ON
 
-
-
 #if defined(PZEM_ON)
 bool GetPzemData(float data, String * val) {
-
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: GetPzemData Start");
@@ -354,10 +326,7 @@ bool GetPzemData(float data, String * val) {
   return true;
 }
 
-
-
 void GetPzemSerialRead() {
-
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: GetPzemSerialRead Start");
@@ -400,10 +369,7 @@ void GetPzemSerialRead() {
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
 
-
-
 void PzemResetEnergy() {
-
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: PzemResetEnergy Start");
@@ -441,8 +407,6 @@ void PzemResetEnergy() {
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
 #endif
-
-
 
 #ifdef MHZ19_ON
 int GetMHZ19() {
@@ -484,9 +448,7 @@ int GetMHZ19() {
 #endif // MHZ19_ON
 
 //========= MQTT ========
-
 bool MqttConnect() {
-
   if (atoi(JConf.mqtt_enable) != 1) {
     return false;
   }
@@ -518,19 +480,16 @@ bool MqttConnect() {
   return true;
 }
 
-
-
 void MqttInit() {
-
   if (atoi(JConf.mqtt_enable) != 1) {
     return;
   }
   //Publish Topics
-  sprintf(lightType_buff, "%s%s%s", JConf.publish_topic, lightType, JConf.mqtt_name);
-  pubTopicLightType = Adafruit_MQTT_Publish(&mqtt, lightType_buff);
+  sprintf(Light1State_buff, "%s%s%s", JConf.publish_topic, Light1State, JConf.mqtt_name);
+  pubTopicLight1State = Adafruit_MQTT_Publish(&mqtt, Light1State_buff);
 
-  sprintf(lightType2_buff, "%s%s%s", JConf.publish_topic, lightType2, JConf.mqtt_name);
-  pubTopicLightType2 = Adafruit_MQTT_Publish(&mqtt, lightType2_buff);
+  sprintf(Light2State_buff, "%s%s%s", JConf.publish_topic, Light2State, JConf.mqtt_name);
+  pubTopicLight2State = Adafruit_MQTT_Publish(&mqtt, Light2State_buff);
 
   sprintf(motionSensor_buff, "%s%s%s", JConf.publish_topic, motionSensor, JConf.mqtt_name);
   pubTopicMotionSensor = Adafruit_MQTT_Publish(&mqtt, motionSensor_buff);
@@ -586,32 +545,29 @@ void MqttInit() {
   pubTopicMac = Adafruit_MQTT_Publish(&mqtt, mac_buff);
 
   //Subscribe Topics
-  sprintf(motionSensorTimer_buff_sub, "%s%s%s", JConf.command_pub_topic, motionSensorTimer, JConf.mqtt_name);
+  sprintf(motionSensorTimer_buff_sub, "%s%s%s", JConf.subscribe_topic, motionSensorTimer, JConf.mqtt_name);
   subTopicMotionSensorTimer = Adafruit_MQTT_Subscribe(&mqtt, motionSensorTimer_buff_sub);
 
-  sprintf(motionSensorTimer2_buff_sub, "%s%s%s", JConf.command_pub_topic, motionSensorTimer2, JConf.mqtt_name);
+  sprintf(motionSensorTimer2_buff_sub, "%s%s%s", JConf.subscribe_topic, motionSensorTimer2, JConf.mqtt_name);
   subTopicMotionSensorTimer2 = Adafruit_MQTT_Subscribe(&mqtt, motionSensorTimer2_buff_sub);
 
-  sprintf(lightType_buff_sub, "%s%s%s", JConf.command_pub_topic, lightType, JConf.mqtt_name);
-  subTopicLightType = Adafruit_MQTT_Subscribe(&mqtt, lightType_buff_sub);
+  sprintf(Light1State_buff_sub, "%s%s%s", JConf.subscribe_topic, Light1State, JConf.mqtt_name);
+  subTopicLight1State = Adafruit_MQTT_Subscribe(&mqtt, Light1State_buff_sub);
 
-  sprintf(lightType2_buff_sub, "%s%s%s", JConf.command_pub_topic, lightType2, JConf.mqtt_name);
-  subTopicLightType2 = Adafruit_MQTT_Subscribe(&mqtt, lightType2_buff_sub);
+  sprintf(Light2State_buff_sub, "%s%s%s", JConf.subscribe_topic, Light2State, JConf.mqtt_name);
+  subTopicLight2State = Adafruit_MQTT_Subscribe(&mqtt, Light2State_buff_sub);
 
-  sprintf(uptime_buff_sub, "%s%s%s", JConf.command_pub_topic, uptime, JConf.mqtt_name);
+  sprintf(uptime_buff_sub, "%s%s%s", JConf.subscribe_topic, uptime, JConf.mqtt_name);
   subTopicUptime = Adafruit_MQTT_Subscribe(&mqtt, uptime_buff_sub);
 
 #ifdef PZEM_ON
-  sprintf(pzemReset_buff_sub, "%s%s%s", JConf.command_pub_topic, pzemReset, JConf.mqtt_name);
+  sprintf(pzemReset_buff_sub, "%s%s%s", JConf.subscribe_topic, pzemReset, JConf.mqtt_name);
   subTopicPzemReset = Adafruit_MQTT_Subscribe(&mqtt, pzemReset_buff_sub);
 #endif //PZEM_ON
 }
 
-
-
 #ifdef DS18X20_ON
 void MqttInitDS() {
-
   if (atoi(JConf.mqtt_enable) != 1) {
     return;
   }
@@ -624,10 +580,7 @@ void MqttInitDS() {
 }
 #endif //DS18X20_ON
 
-
-
 bool MqttPubLightState() {
-
   if (atoi(JConf.mqtt_enable) != 1) {
     return false;
   }
@@ -649,7 +602,7 @@ bool MqttPubLightState() {
   } else {
     lightStateNum = String(F("2"));
   }
-  pubTopicLightType.publish(lightStateNum.c_str());
+  pubTopicLight1State.publish(lightStateNum.c_str());
 
   if (light2State == ON) {
     lightStateNum = String(F("1"));
@@ -658,7 +611,7 @@ bool MqttPubLightState() {
   } else {
     lightStateNum = String(F("2"));
   }
-  pubTopicLightType2.publish(lightStateNum.c_str());
+  pubTopicLight2State.publish(lightStateNum.c_str());
 
   unsigned long load_time = millis() - start_time;
   snprintf_P(log, sizeof(log), PSTR("Func: MqttPubLightState load time: %d"), load_time);
@@ -667,10 +620,7 @@ bool MqttPubLightState() {
   return true;
 }
 
-
-
 bool MqttPublight1_offDelay() {
-
   if (atoi(JConf.mqtt_enable) != 1) {
     return false;
   }
@@ -691,10 +641,7 @@ bool MqttPublight1_offDelay() {
   return true;
 }
 
-
-
 bool MqttPubData() {
-
   if (atoi(JConf.mqtt_enable) != 1) {
     return false;
   }
@@ -758,8 +705,6 @@ bool MqttPubData() {
   return true;
 }
 
-
-
 void CallbackMotionSensorTimer(char *data, uint16_t len) {
 
   char log[LOGSZ];
@@ -774,10 +719,7 @@ void CallbackMotionSensorTimer(char *data, uint16_t len) {
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
 
-
-
 void CallbackMotionSensorTimer2(char *data, uint16_t len) {
-
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: CallbackMotionSensorTimer2 Start");
@@ -790,13 +732,10 @@ void CallbackMotionSensorTimer2(char *data, uint16_t len) {
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
 
-
-
-void CallbackLightType(char *data, uint16_t len) {
-
+void CallbackLight1State(char *data, uint16_t len) {
   char log[LOGSZ];
   unsigned long start_time = millis();
-  addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: CallbackLightType Start");
+  addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: CallbackLight1State Start");
 
   if (strncmp (data, "1", 1) == 0) {
     light1State = ON;
@@ -809,17 +748,14 @@ void CallbackLightType(char *data, uint16_t len) {
   Light1Control();
 
   unsigned long load_time = millis() - start_time;
-  snprintf_P(log, sizeof(log), PSTR("Func: CallbackLightType load time: %d"), load_time);
+  snprintf_P(log, sizeof(log), PSTR("Func: CallbackLight1State load time: %d"), load_time);
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
 
-
-
-void CallbackLightType2(char *data, uint16_t len) {
-
+void CallbackLight2State(char *data, uint16_t len) {
   char log[LOGSZ];
   unsigned long start_time = millis();
-  addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: CallbackLightType2 Start");
+  addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: CallbackLight2State Start");
 
   if (strncmp (data, "1", 1) == 0) {
     light2State = ON;
@@ -832,11 +768,9 @@ void CallbackLightType2(char *data, uint16_t len) {
   Light2Control();
 
   unsigned long load_time = millis() - start_time;
-  snprintf_P(log, sizeof(log), PSTR("Func: CallbackLightType2 load time: %d"), load_time);
+  snprintf_P(log, sizeof(log), PSTR("Func: CallbackLight2State load time: %d"), load_time);
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
-
-
 
 #ifdef PZEM_ON
 void CallbackPzemReset(char *data, uint16_t len) {
@@ -855,10 +789,7 @@ void CallbackPzemReset(char *data, uint16_t len) {
 }
 #endif
 
-
-
 void CallbackUptime(char *data, uint16_t len) {
-
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: CallbackUptime Start");
@@ -874,10 +805,7 @@ void CallbackUptime(char *data, uint16_t len) {
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
 
-
-
 void MqttSubscribe() {
-
   if (atoi(JConf.mqtt_enable) != 1) {
     return;
   }
@@ -888,14 +816,14 @@ void MqttSubscribe() {
 
   subTopicMotionSensorTimer.setCallback(CallbackMotionSensorTimer);
   subTopicMotionSensorTimer2.setCallback(CallbackMotionSensorTimer2);
-  subTopicLightType.setCallback(CallbackLightType);
-  subTopicLightType2.setCallback(CallbackLightType2);
+  subTopicLight1State.setCallback(CallbackLight1State);
+  subTopicLight2State.setCallback(CallbackLight2State);
   subTopicUptime.setCallback(CallbackUptime);
 
   mqtt.subscribe(&subTopicMotionSensorTimer);
   mqtt.subscribe(&subTopicMotionSensorTimer2);
-  mqtt.subscribe(&subTopicLightType);
-  mqtt.subscribe(&subTopicLightType2);
+  mqtt.subscribe(&subTopicLight1State);
+  mqtt.subscribe(&subTopicLight2State);
   mqtt.subscribe(&subTopicUptime);
 
 #ifdef PZEM_ON
@@ -909,6 +837,4 @@ void MqttSubscribe() {
   snprintf_P(log, sizeof(log), PSTR("Func: MqttSubscribe load time: %d"), load_time);
   addLog(LOG_LEVEL_DEBUG_MORE, log);
 }
-
-
 

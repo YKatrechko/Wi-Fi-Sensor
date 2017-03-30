@@ -36,7 +36,6 @@ DynamicJsonBuffer jsonBuffer(bufferSize);
   json["mqtt_name"]                     = mqtt_name                    ;
   json["publish_topic"]                 = publish_topic                ;
   json["subscribe_topic"]               = subscribe_topic              ;
-  json["command_pub_topic"]             = command_pub_topic            ;
   json["light1_pin"]                    = light1_pin                   ;
   json["light1_on_lux"]                 = light1_on_lux                ;
   json["light2_pin"]                    = light2_pin                   ;
@@ -153,7 +152,6 @@ JsonObject& json = jsonBuffer.parseObject(buf.get());
   if (json.containsKey("mqtt_name"                     )) {  const char* mqtt_name_char                     = json["mqtt_name"                    ];    sprintf_P(mqtt_name,                     ("%s"), mqtt_name_char                    ); }
   if (json.containsKey("publish_topic"                 )) {  const char* publish_topic_char                 = json["publish_topic"                ];    sprintf_P(publish_topic,                 ("%s"), publish_topic_char                ); }
   if (json.containsKey("subscribe_topic"               )) {  const char* subscribe_topic_char               = json["subscribe_topic"              ];    sprintf_P(subscribe_topic,               ("%s"), subscribe_topic_char              ); }
-  if (json.containsKey("command_pub_topic"             )) {  const char* command_pub_topic_char             = json["command_pub_topic"            ];    sprintf_P(command_pub_topic,             ("%s"), command_pub_topic_char            ); }
   if (json.containsKey("light1_pin"                    )) {  const char* light1_pin_char                    = json["light1_pin"                   ];    sprintf_P(light1_pin,                    ("%s"), light1_pin_char                   ); }
   if (json.containsKey("light1_on_lux"                 )) {  const char* light1_on_lux_char                 = json["light1_on_lux"                ];    sprintf_P(light1_on_lux,                 ("%s"), light1_on_lux_char                ); }
   if (json.containsKey("light2_pin"                    )) {  const char* light2_pin_char                    = json["light2_pin"                   ];    sprintf_P(light2_pin,                    ("%s"), light2_pin_char                   ); }
@@ -219,7 +217,6 @@ bool JsonConf::printConfig() {
   Serial.print(F("mqtt_name                    : "));   Serial.println(mqtt_name                    );
   Serial.print(F("publish_topic                : "));   Serial.println(publish_topic                );
   Serial.print(F("subscribe_topic              : "));   Serial.println(subscribe_topic              );
-  Serial.print(F("command_pub_topic            : "));   Serial.println(command_pub_topic            );
   Serial.print(F("light1_pin                   : "));   Serial.println(light1_pin                   );
   Serial.print(F("light1_on_lux                : "));   Serial.println(light1_on_lux                );
   Serial.print(F("light2_pin                   : "));   Serial.println(light2_pin                   );
