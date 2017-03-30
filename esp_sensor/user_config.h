@@ -187,7 +187,7 @@ const char *pzemPower          = "pzemPower"         ;
 const char *pzemEnergy         = "pzemEnergy"        ;
 const char *pzemReset          = "pzemReset"         ;
 const char *mhz19ppm           = "mhz19ppm"          ;
-const char *SaveConfig         = "SaveConfig"        ;
+const char *saveConfig         = "saveConfig"        ;
 
 const char sec[] PROGMEM = "sec";
 

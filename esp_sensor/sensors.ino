@@ -465,7 +465,9 @@ bool MqttConnect() {
 
   addLog_P(LOG_LEVEL_INFO, "MqttConnect: Connecting to MQTT...");
   if ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
-    snprintf_P(log, sizeof(log), PSTR("MqttConnect: Error: %s"), String(ret).c_str());
+    snprintf_P(log, sizeof(log), PSTR("MqttConnect: Error: %s"), String(mqtt.connectErrorString(ret)).c_str());
+    //        snprintf_P(log, sizeof(log), String(mqtt.connectErrorString(ret)).c_str());
+
     addLog(LOG_LEVEL_ERROR, log);
     mqtt.disconnect();
     return false;
@@ -566,9 +568,9 @@ void MqttInit() {
   sprintf(uptime_buff_sub, "%s%s%s", JConf.subscribe_topic, uptime, JConf.mqtt_name);
   subTopicUptime = Adafruit_MQTT_Subscribe(&mqtt, uptime_buff_sub);
 
-  sprintf(saveConfig_buff_sub, "%s%s%s", JConf.subscribe_topic, SaveConfig, JConf.mqtt_name);
+  sprintf(saveConfig_buff_sub, "%s%s%s", JConf.subscribe_topic, saveConfig, JConf.mqtt_name);
   subTopicSaveConfig = Adafruit_MQTT_Subscribe(&mqtt, saveConfig_buff_sub);
-  
+
 #ifdef PZEM_ON
   sprintf(pzemReset_buff_sub, "%s%s%s", JConf.subscribe_topic, pzemReset, JConf.mqtt_name);
   subTopicPzemReset = Adafruit_MQTT_Subscribe(&mqtt, pzemReset_buff_sub);
@@ -763,8 +765,6 @@ void CallbackLight1StartTime(char *data, uint16_t len) {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: CallbackLight1StartTime Start");
-  addLog_P(LOG_LEVEL_DEBUG, "Light1StartTime data: ");
-  addLog_P(LOG_LEVEL_DEBUG, data);
 
   strlcpy(JConf.light1_start_time, data, sizeof(JConf.light1_start_time));
   WorkTimeSettingsUpdate();
@@ -778,8 +778,6 @@ void CallbackLight2StartTime(char *data, uint16_t len) {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: CallbackLight2StartTime Start");
-  addLog_P(LOG_LEVEL_DEBUG, "Light2StartTime data: ");
-  addLog_P(LOG_LEVEL_DEBUG, data);
 
   strlcpy(JConf.light2_start_time, data, sizeof(JConf.light2_start_time));
   WorkTimeSettingsUpdate();
@@ -811,8 +809,6 @@ void CallbackLight2StopTime(char *data, uint16_t len) {
   char log[LOGSZ];
   unsigned long start_time = millis();
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: CallbackLight2StopTime Start");
-  addLog_P(LOG_LEVEL_DEBUG, "Light2StopTime data: ");
-  addLog_P(LOG_LEVEL_DEBUG, data);
 
   strlcpy(JConf.light2_stop_time, data, sizeof(JConf.light2_stop_time));
   WorkTimeSettingsUpdate();
