@@ -1,16 +1,17 @@
-// Copyright Benoit Blanchon 2014-2016
+// Copyright Benoit Blanchon 2014-2017
 // MIT License
 //
 // Arduino JSON library
-// https://github.com/bblanchon/ArduinoJson
+// https://bblanchon.github.io/ArduinoJson/
 // If you like this project, please add a star!
 
 #pragma once
 
-// If Visual Studo <= 2012
-#if defined(_MSC_VER) && _MSC_VER <= 1700
+// If Visual Studo
+#if defined(_MSC_VER)
 
 #include <float.h>
+#include <limits>
 
 namespace ArduinoJson {
 namespace Polyfills {
@@ -22,6 +23,16 @@ bool isNaN(T x) {
 template <typename T>
 bool isInfinity(T x) {
   return !_finite(x);
+}
+
+template <typename T>
+T nan() {
+  return std::numeric_limits<T>::quiet_NaN();
+}
+
+template <typename T>
+T inf() {
+  return std::numeric_limits<T>::infinity();
 }
 }
 }
@@ -43,7 +54,7 @@ bool isInfinity(T x) {
 #endif
 
 // Workaround for libs that #undef isnan or isinf
-// https://github.com/bblanchon/ArduinoJson/issues/284
+// https://bblanchon.github.io/ArduinoJson//issues/284
 #if !defined(isnan) || !defined(isinf)
 namespace std {}
 #endif
@@ -54,7 +65,7 @@ namespace Polyfills {
 template <typename T>
 bool isNaN(T x) {
 // Workaround for libs that #undef isnan
-// https://github.com/bblanchon/ArduinoJson/issues/284
+// https://bblanchon.github.io/ArduinoJson//issues/284
 #ifndef isnan
   using namespace std;
 #endif
@@ -79,7 +90,7 @@ inline bool isNaN<float>(float x) {
 template <typename T>
 bool isInfinity(T x) {
 // Workaround for libs that #undef isinf
-// https://github.com/bblanchon/ArduinoJson/issues/284
+// https://bblanchon.github.io/ArduinoJson//issues/284
 #ifndef isinf
   using namespace std;
 #endif
@@ -100,6 +111,16 @@ inline bool isInfinity<float>(float x) {
   return isinff(x);
 }
 #endif
+
+template <typename T>
+T nan() {
+  return static_cast<T>(NAN);
+}
+
+template <typename T>
+T inf() {
+  return static_cast<T>(INFINITY);
+}
 
 #if defined(__GNUC__)
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)

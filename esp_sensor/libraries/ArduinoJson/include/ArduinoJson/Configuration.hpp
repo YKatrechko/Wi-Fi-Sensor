@@ -1,11 +1,16 @@
-// Copyright Benoit Blanchon 2014-2016
+// Copyright Benoit Blanchon 2014-2017
 // MIT License
 //
 // Arduino JSON library
-// https://github.com/bblanchon/ArduinoJson
+// https://bblanchon.github.io/ArduinoJson/
 // If you like this project, please add a star!
 
 #pragma once
+
+// enable deprecated functions by default
+#ifndef ARDUINOJSON_ENABLE_DEPRECATED
+#define ARDUINOJSON_ENABLE_DEPRECATED 1
+#endif
 
 #ifdef ARDUINO  // assume this is an embedded platform
 
@@ -25,6 +30,19 @@
 // Arduino has its own implementation of String to replace std::string
 #ifndef ARDUINOJSON_ENABLE_ARDUINO_STRING
 #define ARDUINOJSON_ENABLE_ARDUINO_STRING 1
+#endif
+
+#ifndef ARDUINOJSON_ENABLE_ARDUINO_STREAM
+#define ARDUINOJSON_ENABLE_ARDUINO_STREAM 1
+#endif
+
+// On AVR archiecture, we can use PROGMEM
+#ifndef ARDUINOJSON_ENABLE_PROGMEM
+#ifdef PROGMEM
+#define ARDUINOJSON_ENABLE_PROGMEM 1
+#else
+#define ARDUINOJSON_ENABLE_PROGMEM 0
+#endif
 #endif
 
 // Arduino doesn't have std::string
@@ -87,9 +105,19 @@
 #define ARDUINOJSON_ENABLE_ARDUINO_STRING 0
 #endif
 
+// PROGMEM is only available on AVR architecture
+#ifndef ARDUINOJSON_ENABLE_PROGMEM
+#define ARDUINOJSON_ENABLE_PROGMEM 0
+#endif
+
 // on a computer, we can assume that the STL is there
 #ifndef ARDUINOJSON_ENABLE_STD_STREAM
 #define ARDUINOJSON_ENABLE_STD_STREAM 1
+#endif
+
+// on a computer, there is no reason to beleive Arduino Stream is available
+#ifndef ARDUINOJSON_ENABLE_ARDUINO_STREAM
+#define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0
 #endif
 
 #ifndef ARDUINOJSON_ENABLE_ALIGNMENT

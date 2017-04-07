@@ -1,8 +1,8 @@
-// Copyright Benoit Blanchon 2014-2016
+// Copyright Benoit Blanchon 2014-2017
 // MIT License
 //
 // Arduino JSON library
-// https://github.com/bblanchon/ArduinoJson
+// https://bblanchon.github.io/ArduinoJson/
 // If you like this project, please add a star!
 
 #pragma once
@@ -12,6 +12,8 @@
 #include <string.h>
 
 #include "JsonVariant.hpp"
+#include "TypeTraits/EnableIf.hpp"
+#include "TypeTraits/IsArray.hpp"
 
 #if defined(__clang__)
 #pragma clang diagnostic push
@@ -51,62 +53,22 @@ class JsonBuffer {
   // allocation fails.
   JsonObject &createObject();
 
-  // Allocates and populate a JsonArray from a JSON string.
+  // Duplicates a string
   //
-  // The First argument is a pointer to the JSON string, the memory must be
-  // writable
-  // because the parser will insert null-terminators and replace escaped chars.
-  //
-  // The second argument set the nesting limit
-  //
-  // Returns a reference to the new JsonObject or JsonObject::invalid() if the
-  // allocation fails.
-  JsonArray &parseArray(
-      char *json, uint8_t nestingLimit = ARDUINOJSON_DEFAULT_NESTING_LIMIT);
-
-  // With this overload, the JsonBuffer will make a copy of the string
+  // char* strdup(TValue);
+  // TValue = const std::string&, const String&,
   template <typename TString>
-  JsonArray &parseArray(const TString &json,
-                        uint8_t nesting = ARDUINOJSON_DEFAULT_NESTING_LIMIT) {
-    return parseArray(strdup(json), nesting);
+  typename TypeTraits::EnableIf<!TypeTraits::IsArray<TString>::value,
+                                char *>::type
+  strdup(const TString &src) {
+    return Internals::StringTraits<TString>::duplicate(src, this);
   }
-
-  // Allocates and populate a JsonObject from a JSON string.
   //
-  // The First argument is a pointer to the JSON string, the memory must be
-  // writable
-  // because the parser will insert null-terminators and replace escaped chars.
-  //
-  // The second argument set the nesting limit
-  //
-  // Returns a reference to the new JsonObject or JsonObject::invalid() if the
-  // allocation fails.
-  JsonObject &parseObject(
-      char *json, uint8_t nestingLimit = ARDUINOJSON_DEFAULT_NESTING_LIMIT);
-
-  // With this overload, the JsonBuffer will make a copy of the string
+  // char* strdup(TValue);
+  // TValue = const char*, const char[N], const FlashStringHelper*
   template <typename TString>
-  JsonObject &parseObject(const TString &json,
-                          uint8_t nesting = ARDUINOJSON_DEFAULT_NESTING_LIMIT) {
-    return parseObject(strdup(json), nesting);
-  }
-
-  // Generalized version of parseArray() and parseObject(), also works for
-  // integral types.
-  JsonVariant parse(char *json,
-                    uint8_t nestingLimit = ARDUINOJSON_DEFAULT_NESTING_LIMIT);
-
-  // With this overload, the JsonBuffer will make a copy of the string
-  template <typename TString>
-  JsonVariant parse(const TString &json,
-                    uint8_t nesting = ARDUINOJSON_DEFAULT_NESTING_LIMIT) {
-    return parse(strdup(json), nesting);
-  }
-
-  // Duplicate a string
-  template <typename TString>
-  char *strdup(const TString &src) {
-    return Internals::StringFuncs<TString>::duplicate(src, this);
+  char *strdup(const TString *src) {
+    return Internals::StringTraits<const TString *>::duplicate(src, this);
   }
 
   // Allocates n bytes in the JsonBuffer.
@@ -114,7 +76,7 @@ class JsonBuffer {
   virtual void *alloc(size_t size) = 0;
 
  protected:
-  // Preserve aligment if nessary
+  // Preserve aligment if necessary
   static FORCE_INLINE size_t round_size_up(size_t bytes) {
 #if ARDUINOJSON_ENABLE_ALIGNMENT
     const size_t x = sizeof(void *) - 1;

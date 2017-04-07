@@ -1,8 +1,8 @@
-// Copyright Benoit Blanchon 2014-2016
+// Copyright Benoit Blanchon 2014-2017
 // MIT License
 //
 // Arduino JSON library
-// https://github.com/bblanchon/ArduinoJson
+// https://bblanchon.github.io/ArduinoJson/
 // If you like this project, please add a star!
 
 #pragma once
@@ -26,8 +26,22 @@ class JsonArraySubscript : public JsonVariantBase<JsonArraySubscript> {
     return *this;
   }
 
+  // Replaces the value
+  //
+  // operator=(TValue)
+  // TValue = bool, long, int, short, float, double, RawJson, JsonVariant,
+  //          const std::string&, const String&,
+  //          const JsonArray&, const JsonObject&
   template <typename T>
   FORCE_INLINE JsonArraySubscript& operator=(const T& src) {
+    _array.set(_index, src);
+    return *this;
+  }
+  //
+  // operator=(TValue)
+  // TValue = const char*, const char[N], const FlashStringHelper*
+  template <typename T>
+  FORCE_INLINE JsonArraySubscript& operator=(const T* src) {
     _array.set(_index, src);
     return *this;
   }
@@ -46,9 +60,29 @@ class JsonArraySubscript : public JsonVariantBase<JsonArraySubscript> {
     return _array.is<T>(_index);
   }
 
+  // Replaces the value
+  //
+  // bool set(TValue)
+  // TValue = bool, long, int, short, float, double, RawJson, JsonVariant,
+  //          const std::string&, const String&,
+  //          const JsonArray&, const JsonObject&
   template <typename TValue>
-  FORCE_INLINE void set(const TValue& value) {
-    _array.set(_index, value);
+  FORCE_INLINE bool set(const TValue& value) {
+    return _array.set(_index, value);
+  }
+  //
+  // bool set(TValue)
+  // TValue = const char*, const char[N], const FlashStringHelper*
+  template <typename TValue>
+  FORCE_INLINE bool set(const TValue* value) {
+    return _array.set(_index, value);
+  }
+  //
+  // bool set(TValue, uint8_t decimals);
+  // TValue = float, double
+  template <typename TValue>
+  FORCE_INLINE bool set(const TValue& value, uint8_t decimals) {
+    return _array.set(_index, value, decimals);
   }
 
  private:
@@ -67,10 +101,19 @@ inline JsonArraySubscript JsonArray::operator[](size_t index) {
   return JsonArraySubscript(*this, index);
 }
 
+inline const JsonArraySubscript JsonArray::operator[](size_t index) const {
+  return JsonArraySubscript(*const_cast<JsonArray*>(this), index);
+}
+
+template <typename TImplem>
+inline JsonArraySubscript JsonVariantBase<TImplem>::operator[](int index) {
+  return as<JsonArray>()[index];
+}
+
 template <typename TImplem>
 inline const JsonArraySubscript JsonVariantBase<TImplem>::operator[](
     int index) const {
-  return asArray()[index];
+  return as<JsonArray>()[index];
 }
 
 }  // namespace ArduinoJson
