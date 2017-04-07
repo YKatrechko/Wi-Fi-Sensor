@@ -30,8 +30,8 @@
 #endif
 
 #define ADAFRUIT_MQTT_VERSION_MAJOR 0
-#define ADAFRUIT_MQTT_VERSION_MINOR 16
-#define ADAFRUIT_MQTT_VERSION_PATCH 1
+#define ADAFRUIT_MQTT_VERSION_MINOR 17
+#define ADAFRUIT_MQTT_VERSION_PATCH 0
 
 // Uncomment/comment to turn on/off debug output messages.
 //#define MQTT_DEBUG
@@ -84,7 +84,7 @@
 #define MQTT_QOS_1 0x1
 #define MQTT_QOS_0 0x0
 
-#define CONNECT_TIMEOUT_MS 2000
+#define CONNECT_TIMEOUT_MS 6000
 #define PUBLISH_TIMEOUT_MS 500
 #define PING_TIMEOUT_MS    500
 #define SUBACK_TIMEOUT_MS  500
@@ -106,13 +106,17 @@
 #define MQTT_CONN_CLEANSESSION    0x02
 
 // how many subscriptions we want to be able to track
-#define MAXSUBSCRIPTIONS 6
+#define MAXSUBSCRIPTIONS 8
 
 // how much data we save in a subscription object
 // eg max-subscription-payload-size
-#define SUBSCRIPTIONDATALEN 20
+#if defined  (__AVR_ATmega32U4__) || defined(__AVR_ATmega328P__)
+  #define SUBSCRIPTIONDATALEN 20
+#else
+  #define SUBSCRIPTIONDATALEN 100
+#endif
 
-class AdafruitIO_Feed;  // forward decl
+class AdafruitIO_MQTT;   // forward decl
 
 //Function pointer that returns an int
 typedef void (*SubscribeCallbackUInt32Type)(uint32_t);
@@ -121,7 +125,7 @@ typedef void (*SubscribeCallbackDoubleType)(double);
 // returns a chunk of raw data
 typedef void (*SubscribeCallbackBufferType)(char *str, uint16_t len);
 // returns an io data wrapper instance
-typedef void (AdafruitIO_Feed::*SubscribeCallbackIOType)(char *str, uint16_t len);
+typedef void (AdafruitIO_MQTT::*SubscribeCallbackIOType)(char *str, uint16_t len);
 
 extern void printBuffer(uint8_t *buffer, uint16_t len);
 
@@ -273,7 +277,7 @@ class Adafruit_MQTT_Subscribe {
   void setCallback(SubscribeCallbackUInt32Type callb);
   void setCallback(SubscribeCallbackDoubleType callb);
   void setCallback(SubscribeCallbackBufferType callb);
-  void setCallback(AdafruitIO_Feed *io, SubscribeCallbackIOType callb);
+  void setCallback(AdafruitIO_MQTT *io, SubscribeCallbackIOType callb);
   void removeCallback(void);
 
   const char *topic;
@@ -289,7 +293,7 @@ class Adafruit_MQTT_Subscribe {
   SubscribeCallbackBufferType callback_buffer;
   SubscribeCallbackIOType     callback_io;
 
-  AdafruitIO_Feed *io_feed;
+  AdafruitIO_MQTT *io_mqtt;
 
  private:
   Adafruit_MQTT *mqtt;

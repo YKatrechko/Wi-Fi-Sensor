@@ -1,14 +1,15 @@
-// Copyright Benoit Blanchon 2014-2016
+// Copyright Benoit Blanchon 2014-2017
 // MIT License
 //
 // Arduino JSON library
-// https://github.com/bblanchon/ArduinoJson
+// https://bblanchon.github.io/ArduinoJson/
 // If you like this project, please add a star!
 
 #pragma once
 
-#include "Internals/JsonVariantAs.hpp"
+#include "Data/JsonVariantAs.hpp"
 #include "Polyfills/attributes.hpp"
+#include "Serialization/JsonPrintable.hpp"
 
 namespace ArduinoJson {
 
@@ -20,10 +21,22 @@ class JsonObjectSubscript;
 template <typename TImpl>
 class JsonVariantBase : public Internals::JsonPrintable<TImpl> {
  public:
-  // DEPRECATED: use as<char*>() instead
+#if ARDUINOJSON_ENABLE_DEPRECATED
+  DEPRECATED("use as<JsonArray>() instead")
+  FORCE_INLINE JsonArray &asArray() const {
+    return as<JsonArray>();
+  }
+
+  DEPRECATED("use as<JsonObject>() instead")
+  FORCE_INLINE JsonObject &asObject() const {
+    return as<JsonObject>();
+  }
+
+  DEPRECATED("use as<char*>() instead")
   FORCE_INLINE const char *asString() const {
     return as<const char *>();
   }
+#endif
 
   // Gets the variant as an array.
   // Returns a reference to the JsonArray or JsonArray::invalid() if the
@@ -33,20 +46,10 @@ class JsonVariantBase : public Internals::JsonPrintable<TImpl> {
     return as<JsonArray &>();
   }
 
-  // DEPRECATED: use as<JsonArray>() instead
-  FORCE_INLINE JsonArray &asArray() const {
-    return as<JsonArray &>();
-  }
-
   // Gets the variant as an object.
   // Returns a reference to the JsonObject or JsonObject::invalid() if the
   // variant is not an object.
   FORCE_INLINE operator JsonObject &() const {
-    return as<JsonObject &>();
-  }
-
-  // DEPRECATED: use as<JsonObject>() instead
-  FORCE_INLINE JsonObject &asObject() const {
     return as<JsonObject &>();
   }
 
@@ -60,25 +63,68 @@ class JsonVariantBase : public Internals::JsonPrintable<TImpl> {
     return impl()->template as<T>();
   }
 
+  template <typename T>
+  FORCE_INLINE bool is() const {
+    return impl()->template is<T>();
+  }
+
   // Mimics an array or an object.
   // Returns the size of the array or object if the variant has that type.
   // Returns 0 if the variant is neither an array nor an object
   size_t size() const {
-    return asArray().size() + asObject().size();
+    return as<JsonArray>().size() + as<JsonObject>().size();
   }
 
   // Mimics an array.
   // Returns the element at specified index if the variant is an array.
   // Returns JsonVariant::invalid() if the variant is not an array.
   FORCE_INLINE const JsonArraySubscript operator[](int index) const;
+  FORCE_INLINE JsonArraySubscript operator[](int index);
 
   // Mimics an object.
   // Returns the value associated with the specified key if the variant is
   // an object.
   // Return JsonVariant::invalid() if the variant is not an object.
+  //
+  // const JsonObjectSubscript operator[](TKey) const;
+  // TKey = const std::string&, const String&
   template <typename TString>
-  FORCE_INLINE const JsonObjectSubscript<TString> operator[](
-      const TString &key) const;
+  FORCE_INLINE typename TypeTraits::EnableIf<
+      Internals::StringTraits<TString>::has_equals,
+      const JsonObjectSubscript<const TString &> >::type
+  operator[](const TString &key) const {
+    return as<JsonObject>()[key];
+  }
+  //
+  // const JsonObjectSubscript operator[](TKey) const;
+  // TKey = const std::string&, const String&
+  template <typename TString>
+  FORCE_INLINE typename TypeTraits::EnableIf<
+      Internals::StringTraits<TString>::has_equals,
+      JsonObjectSubscript<const TString &> >::type
+  operator[](const TString &key) {
+    return as<JsonObject>()[key];
+  }
+  //
+  // JsonObjectSubscript operator[](TKey);
+  // TKey = const char*, const char[N], const FlashStringHelper*
+  template <typename TString>
+  FORCE_INLINE typename TypeTraits::EnableIf<
+      Internals::StringTraits<const TString *>::has_equals,
+      JsonObjectSubscript<const TString *> >::type
+  operator[](const TString *key) {
+    return as<JsonObject>()[key];
+  }
+  //
+  // JsonObjectSubscript operator[](TKey);
+  // TKey = const char*, const char[N], const FlashStringHelper*
+  template <typename TString>
+  FORCE_INLINE typename TypeTraits::EnableIf<
+      Internals::StringTraits<TString *>::has_equals,
+      const JsonObjectSubscript<const TString *> >::type
+  operator[](const TString *key) const {
+    return as<JsonObject>()[key];
+  }
 
  private:
   const TImpl *impl() const {
@@ -86,63 +132,8 @@ class JsonVariantBase : public Internals::JsonPrintable<TImpl> {
   }
 };
 
-template <typename TImpl, typename TComparand>
-inline bool operator==(const JsonVariantBase<TImpl> &left, TComparand right) {
-  return left.template as<TComparand>() == right;
-}
-
-template <typename TImpl, typename TComparand>
-inline bool operator==(TComparand left, const JsonVariantBase<TImpl> &right) {
-  return left == right.template as<TComparand>();
-}
-
-template <typename TImpl, typename TComparand>
-inline bool operator!=(const JsonVariantBase<TImpl> &left, TComparand right) {
-  return left.template as<TComparand>() != right;
-}
-
-template <typename TImpl, typename TComparand>
-inline bool operator!=(TComparand left, const JsonVariantBase<TImpl> &right) {
-  return left != right.template as<TComparand>();
-}
-
-template <typename TImpl, typename TComparand>
-inline bool operator<=(const JsonVariantBase<TImpl> &left, TComparand right) {
-  return left.template as<TComparand>() <= right;
-}
-
-template <typename TImpl, typename TComparand>
-inline bool operator<=(TComparand left, const JsonVariantBase<TImpl> &right) {
-  return left <= right.template as<TComparand>();
-}
-
-template <typename TImpl, typename TComparand>
-inline bool operator>=(const JsonVariantBase<TImpl> &left, TComparand right) {
-  return left.template as<TComparand>() >= right;
-}
-
-template <typename TImpl, typename TComparand>
-inline bool operator>=(TComparand left, const JsonVariantBase<TImpl> &right) {
-  return left >= right.template as<TComparand>();
-}
-
-template <typename TImpl, typename TComparand>
-inline bool operator<(const JsonVariantBase<TImpl> &left, TComparand right) {
-  return left.template as<TComparand>() < right;
-}
-
-template <typename TImpl, typename TComparand>
-inline bool operator<(TComparand left, const JsonVariantBase<TImpl> &right) {
-  return left < right.template as<TComparand>();
-}
-
-template <typename TImpl, typename TComparand>
-inline bool operator>(const JsonVariantBase<TImpl> &left, TComparand right) {
-  return left.template as<TComparand>() > right;
-}
-
-template <typename TImpl, typename TComparand>
-inline bool operator>(TComparand left, const JsonVariantBase<TImpl> &right) {
-  return left > right.template as<TComparand>();
+namespace TypeTraits {
+template <typename T>
+struct IsVariant : IsBaseOf<JsonVariantBase<T>, T> {};
 }
 }
