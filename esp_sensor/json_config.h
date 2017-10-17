@@ -23,7 +23,7 @@ class JsonConf
     char wifi_auth                    [13]  = "WPA2_PSK"          ;
     char sta_ssid                     [32] = "AAA0"               ;
     char sta_pwd                      [32] = "WPA7305023"         ;
-    char ap_pwd                       [32] = "Poiu0987"           ;
+    char ap_pwd                       [32] = "1234567890"         ;
     char static_ip                    [16] = "192.168.2.220"      ;
     char static_gateway               [16] = "192.168.2.1"        ;
     char static_subnet                [16] = "255.255.255.0"      ;

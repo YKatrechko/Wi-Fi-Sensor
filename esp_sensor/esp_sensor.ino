@@ -139,7 +139,7 @@ void Light1Control() {
   }
   if (state_prev != worktime[0].state) {
     snprintf_P(log, sizeof(log), PSTR("Light 1 mode: '%s' state go to '%s'"), light1State.c_str(), worktime[0].state ? "on" : "off");
-    addLog(LOG_LEVEL_INFO, log);
+    addLog(LOG_LEVEL_ERROR, log);
   }
   digitalWrite(atoi(JConf.light1_pin), worktime[0].state);
 
@@ -171,7 +171,7 @@ void Light2Control() {
   }
   if (state_prev != worktime[1].state) {
     snprintf_P(log, sizeof(log), PSTR("Light 2 mode: '%s' state go to '%s'"), light2State.c_str(), worktime[1].state ? "on" : "off");
-    addLog(LOG_LEVEL_INFO, log);
+    addLog(LOG_LEVEL_ERROR, log);
   }
   digitalWrite(atoi(JConf.light2_pin), worktime[1].state);
 
