@@ -1,0 +1,11 @@
+
+git log --pretty=oneline
+git log --pretty=format:"%h - %an, %ar : %s"
+
+git checkout master -b short_branch
+git cherry-pick da286341b2f12c520c71b1b545ec02af8f0e784f..4f8077c0b815a6c0aac0ebf3891ed1502cd45f24 
+
+git checkout dev -b green_light
+
+git tag -a 1.12.1 -m "green lamp with time control"
+git push origin --tags

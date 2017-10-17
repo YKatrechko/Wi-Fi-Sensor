@@ -136,6 +136,8 @@ void Light1Control() {
       worktime[0].state = LOW;
     }
   }
+  snprintf_P(log, sizeof(log), PSTR("Light 1 state: '%s' go to %s"), worktime[0].state ? "ON" : "OFF");
+  addLog(LOG_LEVEL_INFO, log);
   digitalWrite(atoi(JConf.light1_pin), worktime[0].state);
 
   unsigned long load_time = millis() - start_time;
@@ -163,6 +165,9 @@ void Light2Control() {
       worktime[1].state = LOW;
     }
   }
+  snprintf_P(log, sizeof(log), PSTR("Light 2 state: '%s' go to %s"), worktime[1].state ? "ON" : "OFF");
+  addLog(LOG_LEVEL_INFO, log);
+
   digitalWrite(atoi(JConf.light2_pin), worktime[1].state);
 
   unsigned long load_time = millis() - start_time;
@@ -223,7 +228,7 @@ String GetUptimeData() {
   uptimeString = String(value_buff);
 
   snprintf_P(log, sizeof(log), PSTR("GetUptimeData: Uptime: %s:%d%d"), uptimeString.c_str(), Second / 10, Second % 10);
-  addLog(LOG_LEVEL_INFO, log);
+  addLog(LOG_LEVEL_DEBUG, log);
 
   unsigned long load_time = millis() - start_time;
   snprintf_P(log, sizeof(log), PSTR("Func: GetUptimeData load time: %d"), load_time);
@@ -269,7 +274,7 @@ void TestSystemPrint()
   addLog(LOG_LEVEL_DEBUG, log);
 
   snprintf_P(log, sizeof(log), PSTR("ESP: IP address: %s"), ipString.c_str());
-  addLog(LOG_LEVEL_DEBUG_MORE, log);
+  addLog(LOG_LEVEL_DEBUG, log);
 
   snprintf_P(log, sizeof(log), PSTR("ESP: Sketch size: %d"), ESP.getSketchSize());
   addLog(LOG_LEVEL_DEBUG, log);
@@ -278,7 +283,7 @@ void TestSystemPrint()
   addLog(LOG_LEVEL_DEBUG, log);
 
   snprintf_P(log, sizeof(log), PSTR("ESP: Free memory: %s"), freeMemoryString.c_str());
-  addLog(LOG_LEVEL_INFO, log);
+  addLog(LOG_LEVEL_DEBUG, log);
 
   snprintf_P(log, sizeof(log), PSTR("ESP: Flash Chip Size: %d"), ESP.getFlashChipSize());
   addLog(LOG_LEVEL_DEBUG_MORE, log);

@@ -162,7 +162,7 @@ const char ONP[] PROGMEM  = "ON";
 const char OFFP[] PROGMEM  = "OFF";
 
 
-const char *ver                = "1.12"              ;
+const char *ver                = "1.12g"              ;
 
 const char *lux                = "Lux"               ;
 const char *Light1State        = "Light1State"       ;
