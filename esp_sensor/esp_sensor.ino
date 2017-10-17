@@ -120,6 +120,7 @@ bool check_worktime(WORKTIME_T wtime) {
 void Light1Control() {
   char log[LOGSZ];
   unsigned long start_time = millis();
+  unsigned int state_prev = worktime[0].state;
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: LightControl Start");
 
   if (light1State == ON) {
@@ -136,8 +137,10 @@ void Light1Control() {
       worktime[0].state = LOW;
     }
   }
-  snprintf_P(log, sizeof(log), PSTR("Light 1 state: '%s' go to %s"), worktime[0].state ? "ON" : "OFF");
-  addLog(LOG_LEVEL_INFO, log);
+  if (state_prev != worktime[0].state) {
+    snprintf_P(log, sizeof(log), PSTR("Light 1 mode: '%s' state go to '%s'"), light1State.c_str(), worktime[0].state ? "on" : "off");
+    addLog(LOG_LEVEL_INFO, log);
+  }
   digitalWrite(atoi(JConf.light1_pin), worktime[0].state);
 
   unsigned long load_time = millis() - start_time;
@@ -149,6 +152,7 @@ void Light1Control() {
 void Light2Control() {
   char log[LOGSZ];
   unsigned long start_time = millis();
+  unsigned int state_prev = worktime[1].state;
   addLog_P(LOG_LEVEL_DEBUG_MORE, "Func: LightControl2 Start");
 
   if (light2State == ON) {
@@ -165,9 +169,10 @@ void Light2Control() {
       worktime[1].state = LOW;
     }
   }
-  snprintf_P(log, sizeof(log), PSTR("Light 2 state: '%s' go to %s"), worktime[1].state ? "ON" : "OFF");
-  addLog(LOG_LEVEL_INFO, log);
-
+  if (state_prev != worktime[1].state) {
+    snprintf_P(log, sizeof(log), PSTR("Light 2 mode: '%s' state go to '%s'"), light2State.c_str(), worktime[1].state ? "on" : "off");
+    addLog(LOG_LEVEL_INFO, log);
+  }
   digitalWrite(atoi(JConf.light2_pin), worktime[1].state);
 
   unsigned long load_time = millis() - start_time;
